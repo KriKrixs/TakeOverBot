@@ -3,7 +3,6 @@ import DiscordClient from "./clients/DiscordClient.js"
 import MongoDBClient from "./clients/MongoDBClient.js"
 import CommandsManager from "./managers/CommandsManager.js"
 import SteamClient from "./clients/SteamClient.js";
-import TrackerNetworkClient from "./clients/TrackerNetworkClient.js";
 import config from "./config.json" assert {"type": "json"}
 
 class PlotBot {
@@ -17,8 +16,7 @@ class PlotBot {
         this.clients = {
             discord: new DiscordClient(this),
             mongo: new MongoDBClient(this),
-            steam: new SteamClient(this),
-            trackerNetwork: new TrackerNetworkClient(this)
+            steam: new SteamClient(this)
         };
 
         // Instanciation des managers

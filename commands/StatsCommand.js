@@ -27,6 +27,7 @@ export const data = () => {
                     {name: 'SMG Weapons', value: 'smg'},
                     {name: 'Heavy Weapons', value: 'heavy'},
                     {name: 'Gear Weapons', value: 'gear'},
+                    {name: 'Last Match', value: 'last_match'}
                 )
         )
         .addUserOption(option =>
@@ -48,47 +49,58 @@ export const execute = async (interaction, opt) => {
         if(discordUserInDb.length === 0) {
             await interaction.editReply("There is no Steam account linked to this user")
         } else {
-            let response = await opt.clients.trackerNetwork.fetchCSGO(discordUserInDb[0].steamId, target)
-
-            if (response.error)
-                return interaction.editReply("An error occured: " + response.message)
-            else
-                response = response.data
+            const csStats = await opt.clients.steam.getCsStats(discordUserInDb[0].steamId)
 
             const embed = new EmbedBuilder()
                 .setColor(0xde9b35)
-                .setURL("https://tracker.gg/csgo/profile/steam/" + discordUserInDb[0].steamId)
+                .setURL("https://steamcommunity.com/profiles/" + discordUserInDb[0].steamId)
                 .setThumbnail(discordUserInDb[0].steamAvatar)
                 .setTimestamp()
                 .setFooter({ text: 'PlotBot' })
 
-            let weapons, maps = []
+            let maps, wins, losses, winPercentage, matchesPlayed, kills, deaths, kdRatio, headshotPercentage, headshotKills, mvps, weaponsKillsStats, mapsRoundsStats
 
             switch(target) {
                 case "user":
-                    const stats = response.user.data.segments[0].stats
+                    const timePlayed = Math.round(csStats.filter(stat => stat.name === "total_time_played")[0].value / 3600 * 10) / 10
+                    matchesPlayed = csStats.filter(stat => stat.name === "total_matches_played")[0].value
+                    const roundsPlayed = csStats.filter(stat => stat.name === "total_rounds_played")[0].value
+                    wins = csStats.filter(stat => stat.name === "total_matches_won")[0].value
+                    losses = matchesPlayed - wins
+                    winPercentage = Math.round(wins * 100 / matchesPlayed * 10) / 10
+                    kills = csStats.filter(stat => stat.name === "total_kills")[0].value
+                    deaths = csStats.filter(stat => stat.name === "total_deaths")[0].value
+                    kdRatio = Math.round(kills / deaths * 100) / 100
+                    headshotKills = csStats.filter(stat => stat.name === "total_kills_headshot")[0].value
+                    headshotPercentage = Math.round(headshotKills * 100 / kills * 10) / 10
+                    mvps = csStats.filter(stat => stat.name === "total_mvps")[0].value
+                    const shotsFired = csStats.filter(stat => stat.name === "total_shots_fired")[0].value
+                    const shotsHit = csStats.filter(stat => stat.name === "total_shots_hit")[0].value
+                    const shotsAccuracy = Math.round(shotsHit * 100 / shotsFired * 10) / 10
+                    const bombsPlanted = csStats.filter(stat => stat.name === "total_planted_bombs")[0].value
+                    const bombsDefused = csStats.filter(stat => stat.name === "total_defused_bombs")[0].value
+                    const hostagesRescued = csStats.filter(stat => stat.name === "total_rescued_hostages")[0].value
 
                     embed.setTitle(discordUserInDb[0].steamName + " - " + "User stats")
-                        .setDescription("Top: Lower is better")
                         .addFields(
-                            { name: 'Time Played', value: stats.timePlayed.displayValue + "\nTop " + (100 - stats.timePlayed.percentile) + "%", inline: true },
-                            { name: 'Matches Played', value: stats.matchesPlayed.displayValue + "\nTop " + (100 - stats.matchesPlayed.percentile) + "%", inline: true },
-                            { name: 'Rounds Played', value: stats.roundsPlayed.displayValue + "\nTop " + (100 - stats.roundsPlayed.percentile) + "%", inline: true },
-                            { name: 'Win %', value: stats.wlPercentage.displayValue + "\nTop " + (100 - stats.wlPercentage.percentile) + "%", inline: true },
-                            { name: 'Wins', value: stats.wins.displayValue + "\nTop " + (100 - stats.wins.percentile) + "%", inline: true },
-                            { name: 'Losses', value: stats.losses.displayValue + "\nTop " + (100 - stats.losses.percentile) + "%", inline: true },
-                            { name: 'K/D', value: stats.kd.displayValue + "\nTop " + (100 - stats.kd.percentile) + "%", inline: true },
-                            { name: 'Kills', value: stats.kills.displayValue + "\nTop " + (100 - stats.kills.percentile) + "%", inline: true},
-                            { name: 'Deaths', value: stats.deaths.displayValue + "\nTop " + (100 - stats.deaths.percentile) + "%", inline: true},
-                            { name: 'Headshot %', value: stats.headshotPct.displayValue + "\nTop " + (100 - stats.headshotPct.percentile) + "%", inline: true},
-                            { name: 'Headshots', value: stats.headshots.displayValue + "\nTop " + (100 - stats.headshots.percentile) + "%", inline: true},
-                            { name: 'MVP', value: stats.mvp.displayValue + "\nTop " + (100 - stats.mvp.percentile) + "%", inline: true},
-                            { name: 'Shots Accuracy', value: stats.shotsAccuracy.displayValue + "\nTop " + (100 - stats.shotsAccuracy.percentile) + "%", inline: true},
-                            { name: 'Shots Fired', value: stats.shotsFired.displayValue + "\nTop " + (100 - stats.shotsFired.percentile) + "%", inline: true},
-                            { name: 'Shots Hit', value: stats.shotsHit.displayValue + "\nTop " + (100 - stats.shotsHit.percentile) + "%", inline: true},
-                            { name: 'Bombs Planted', value: stats.bombsPlanted.displayValue + "\nTop " + (100 - stats.bombsPlanted.percentile) + "%", inline: true},
-                            { name: 'Bombs Defused', value: stats.bombsDefused.displayValue + "\nTop " + (100 - stats.bombsDefused.percentile) + "%", inline: true},
-                            { name: 'Hostages Rescued', value: stats.hostagesRescued.displayValue + "\nTop " + (100 - stats.hostagesRescued.percentile) + "%", inline: true}
+                            { name: 'Time Played', value: timePlayed + "h", inline: true },
+                            { name: 'Matches Played', value: matchesPlayed.toString(), inline: true },
+                            { name: 'Rounds Played', value: roundsPlayed.toString(), inline: true },
+                            { name: 'Win %', value: winPercentage + "%", inline: true },
+                            { name: 'Wins', value: wins.toString(), inline: true },
+                            { name: 'Losses', value: losses.toString(), inline: true },
+                            { name: 'K/D', value: kdRatio.toString(), inline: true },
+                            { name: 'Kills', value: kills.toString(), inline: true},
+                            { name: 'Deaths', value: deaths.toString(), inline: true},
+                            { name: 'Headshot %', value: headshotPercentage + "%", inline: true},
+                            { name: 'Headshots', value: headshotKills.toString(), inline: true},
+                            { name: 'MVP', value: mvps.toString(), inline: true},
+                            { name: 'Shots Accuracy', value: shotsAccuracy + "%", inline: true},
+                            { name: 'Shots Fired', value: shotsFired.toString(), inline: true},
+                            { name: 'Shots Hit', value: shotsHit.toString(), inline: true},
+                            { name: 'Bombs Planted', value: bombsPlanted.toString(), inline: true},
+                            { name: 'Bombs Defused', value: bombsDefused.toString(), inline: true},
+                            { name: 'Hostages Rescued', value: hostagesRescued.toString(), inline: true}
                         )
 
                     return interaction.editReply({ embeds: [embed] })
@@ -98,13 +110,10 @@ export const execute = async (interaction, opt) => {
                 case "heavy":
                 case "gear":
                 case "weapon":
-                    weapons = response.weapon.data.sort((a, b) => {
-                        if(a.stats.kills.value > b.stats.kills.value)
+                    weaponsKillsStats = csStats.filter(stat => stat.name.startsWith("total_kills") && !["total_kills", "total_kills_headshot", "total_kills_enemy_weapon", "total_kills_against_zoomed_sniper", "total_kills_enemy_blinded", "total_kills_knife_fight"].includes(stat.name)).sort((a, b) => {
+                        if(a.value > b.value)
                             return -1
                     })
-
-                    if(target !== "weapon")
-                        weapons = weapons.filter(weapon => weapon.attributes.categoryKey === target)
 
                     let title
 
@@ -130,91 +139,121 @@ export const execute = async (interaction, opt) => {
                     }
 
                     embed.setTitle(discordUserInDb[0].steamName + title)
-                        .setDescription((weapons.length > 6 ? "More weapons on the tracker network website (click just above)\n" : "") + "Top: Lower is better")
 
-                    for(let i = 0; i < 6; i++) {
-                        let weapon = weapons[i]
+                    let y = 0
 
-                        if(weapon !== undefined) {
-                            let accuracy = weapon.stats.shotsAccuracy.displayValue + "\nTop: " + (100 - weapon.stats.shotsAccuracy.percentile) + "%"
-                            let hit = weapon.stats.shotsHit.displayValue + "\nTop: " + (100 - weapon.stats.shotsHit.percentile) + "%"
+                    for(let i = 0; i < 8; i) {
+                        const weapon = weaponsKillsStats[y]
 
-                            if(target === "gear") {
-                                accuracy = Math.floor(weapon.stats.kills.value * 100 / weapon.stats.shotsFired.value) + "%"
-                                hit = weapon.stats.shotsFired.displayValue
-                            }
+                        if(weapon === undefined)
+                            break
 
-                            embed.addFields(
-                                { name: weapon.metadata.name + " - Kills", value: weapon.stats.kills.displayValue + "\nTop: " + (100 - weapon.stats.kills.percentile) + "%", inline: true },
-                                { name: "Accuracy", value: accuracy, inline: true },
-                                { name: "Hit", value: hit, inline: true },
-                            )
-                        }
+                        y++
+
+                        const weaponName = weapon.name.split('_').at(-1)
+                        const weaponInfos = weaponsInfos.filter(info => info.name === weaponName)[0]
+
+                        if(target !== "weapon" && weaponInfos.type !== target)
+                            continue
+
+                        const weaponShots = csStats.filter(stat => stat.name === "total_shots_" + weaponName)
+                        const weaponHits = csStats.filter(stat => stat.name === "total_hits_" + weaponName)
+
+                        let accuracy = weaponHits.length > 0 ? (Math.round(weaponHits[0].value * 100 / weaponShots[0].value * 10) / 10) : null
+
+                        if(weaponName === "taser")
+                            accuracy = (Math.round(weapon.value * 100 / weaponShots[0].value * 10) / 10)
+
+                        embed.addFields(
+                            { name: weaponInfos.displayName + " - Kills", value: weapon.value.toString(), inline: true },
+                            { name: accuracy !== null ? "Accuracy" : '\u200B', value: accuracy !== null ? (accuracy + "%") : '\u200B', inline: true },
+                            { name: '\u200B', value: '\u200B', inline: true },
+                        )
+
+                        i++
                     }
 
                     return interaction.editReply({ embeds: [embed] });
                 case "map":
-                    maps = response.map.data.sort((a, b) => {
-                        if(a.stats.rounds.value > b.stats.rounds.value)
+                    mapsRoundsStats = csStats.filter(stat => stat.name.startsWith("total_rounds_map")).sort((a, b) => {
+                        if(a.value > b.value)
                             return -1
                     })
 
                     embed.setTitle(discordUserInDb[0].steamName + " - " + "Maps stats")
-                        .setDescription("More maps on the tracker network website (click just above)")
 
-                    for(let i = 0; i < 6; i++) {
-                        let map = maps[i]
+                    for(let i = 0; i < 8; i++) {
+                        const map = mapsRoundsStats[i]
+
+                        const mapName = map.name.split("_").at(-1)
+                        const mapInfos = mapsInfos.filter(info => info.name === mapName)[0]
+                        const mapWins = csStats.filter(stat => stat.name.startsWith("total_wins_map") && stat.name.endsWith(mapName))[0]
+                        const mapWinsPercentage = Math.floor(mapWins.value * 100 / map.value * 10) / 10
 
                         embed.addFields(
-                            { name: map.metadata.name + " - Rounds", value: map.stats.rounds.displayValue, inline: true },
-                            { name: "Round Win %", value: Math.floor(map.stats.wins.value * 100 / map.stats.rounds.value) + "%", inline: true },
-                            { name: "Round Win", value: map.stats.wins.displayValue, inline: true },
+                            { name: mapInfos.displayName + " - Rounds", value: map.value.toString(), inline: true },
+                            { name: "Round Win %", value: mapWinsPercentage + "%", inline: true },
+                            { name: "Round Win", value: mapWins.value.toString(), inline: true },
                         )
                     }
 
                     return interaction.editReply({ embeds: [embed] })
+                case "last_match":
+
                 default:
-                    const user = response.user.data.segments[0].stats
-                    const weapon = response.weapon.data
-                    const map = response.map.data
+                    matchesPlayed = csStats.filter(stat => stat.name === "total_matches_played")[0].value
+                    wins = csStats.filter(stat => stat.name === "total_matches_won")[0].value
+                    losses = matchesPlayed - wins
+                    winPercentage = Math.round(wins * 100 / matchesPlayed * 10) / 10
+                    kills = csStats.filter(stat => stat.name === "total_kills")[0].value
+                    deaths = csStats.filter(stat => stat.name === "total_deaths")[0].value
+                    kdRatio = Math.round(kills / deaths * 100) / 100
+                    headshotKills = csStats.filter(stat => stat.name === "total_kills_headshot")[0].value
+                    headshotPercentage = Math.round(headshotKills * 100 / kills * 10) / 10
+                    mvps = csStats.filter(stat => stat.name === "total_mvps")[0].value
 
                     embed.setTitle(discordUserInDb[0].steamName + " - " + "Overall stats")
-                        .setDescription("Top: Lower is better")
                         .addFields(
-                            { name: 'Win %', value: user.wlPercentage.displayValue + "\nTop " + (100 - user.wlPercentage.percentile) + "%", inline: true },
-                            { name: 'Wins', value: user.wins.displayValue + "\nTop " + (100 - user.wins.percentile) + "%", inline: true },
-                            { name: 'Losses', value: user.losses.displayValue + "\nTop " + (100 - user.losses.percentile) + "%", inline: true },
-                            { name: 'K/D', value: user.kd.displayValue + "\nTop " + (100 - user.kd.percentile) + "%", inline: true },
-                            { name: 'Kills', value: user.kills.displayValue + "\nTop " + (100 - user.kills.percentile) + "%", inline: true},
-                            { name: 'Deaths', value: user.deaths.displayValue + "\nTop " + (100 - user.deaths.percentile) + "%", inline: true},
-                            { name: 'Headshot %', value: user.headshotPct.displayValue + "\nTop " + (100 - user.headshotPct.percentile) + "%", inline: true},
-                            { name: 'Headshots', value: user.headshots.displayValue + "\nTop " + (100 - user.headshots.percentile) + "%", inline: true},
-                            { name: 'MVP', value: user.mvp.displayValue + "\nTop " + (100 - user.mvp.percentile) + "%", inline: true},
+                            { name: 'Win %', value: winPercentage + "%", inline: true },
+                            { name: 'Wins', value: wins.toString(), inline: true },
+                            { name: 'Losses', value: losses.toString(), inline: true },
+                            { name: 'K/D', value: kdRatio.toString(), inline: true },
+                            { name: 'Kills', value: kills.toString(), inline: true},
+                            { name: 'Deaths', value: deaths.toString(), inline: true},
+                            { name: 'Headshot %', value: headshotPercentage + "%", inline: true},
+                            { name: 'Headshots', value: headshotKills.toString(), inline: true},
+                            { name: 'MVP', value: mvps.toString(), inline: true},
                         )
 
-                    weapons = weapon.sort((a, b) => {
-                        if(a.stats.kills.value > b.stats.kills.value)
+                    weaponsKillsStats = csStats.filter(stat => stat.name.startsWith("total_kills") && !["total_kills", "total_kills_headshot", "total_kills_enemy_weapon", "total_kills_against_zoomed_sniper", "total_kills_enemy_blinded", "total_kills_knife_fight"].includes(stat.name)).sort((a, b) => {
+                        if(a.value > b.value)
                             return -1
                     })
 
                     for(let i = 0; i < 3; i++) {
-                        let weapon = weapons[i]
+                        const weapon = weaponsKillsStats[i]
+
+                        const weaponName = weapon.name.split('_').at(-1)
+                        const weaponInfos = weaponsInfos.filter(info => info.name === weaponName)[0]
 
                         embed.addFields(
-                            { name: weapon.metadata.name + " - Kills", value: weapon.stats.kills.displayValue + "\nTop: " + (100 - weapon.stats.kills.percentile) + "%", inline: true}
+                            { name: weaponInfos.displayName + " - Kills", value: weapon.value.toString(), inline: true}
                         )
                     }
 
-                    maps = map.sort((a, b) => {
-                        if(a.stats.rounds.value > b.stats.rounds.value)
+                    mapsRoundsStats = csStats.filter(stat => stat.name.startsWith("total_rounds_map")).sort((a, b) => {
+                        if(a.value > b.value)
                             return -1
                     })
 
                     for(let i = 0; i < 3; i++) {
-                        let map = maps[i]
+                        const map = mapsRoundsStats[i]
+
+                        const mapName = map.name.split("_").at(-1)
+                        const mapInfos = mapsInfos.filter(info => info.name === mapName)[0]
 
                         embed.addFields(
-                            { name: map.metadata.name + " - Rounds", value: map.stats.rounds.displayValue, inline: true },
+                            { name: mapInfos.displayName + " - Rounds", value: map.value.toString(), inline: true },
                         )
                     }
 
@@ -223,3 +262,58 @@ export const execute = async (interaction, opt) => {
         }
     }
 }
+
+const weaponsInfos = [
+    { name: "knife", displayName: "Knife", type: "gear" },
+    { name: "hegrenade", displayName: "Grenade", type: "gear" },
+    { name: "glock", displayName: "Glock-18", type: "pistol" },
+    { name: "deagle", displayName: "Desert Eagle / R8 Revolver", type: "pistol" },
+    { name: "elite", displayName: "Dual Berretas", type: "pistol" },
+    { name: "fiveseven", displayName: "Five-SeveN", type: "pistol" },
+    { name: "xm1014", displayName: "XM1014", type: "heavy" },
+    { name: "mac10", displayName: "MAC-10", type: "smg" },
+    { name: "ump45", displayName: "UMP-45", type: "smg" },
+    { name: "p90", displayName: "P90", type: "smg" },
+    { name: "awp", displayName: "AWP", type: "rifle" },
+    { name: "ak47", displayName: "AK-47", type: "rifle" },
+    { name: "aug", displayName: "AUG", type: "rifle" },
+    { name: "famas", displayName: "Famas", type: "rifle" },
+    { name: "g3sg1", displayName: "G3SG1", type: "rifle" },
+    { name: "m249", displayName: "M249", type: "heavy" },
+    { name: "hkp2000", displayName: "P2000 / USP-S", type: "pistol" },
+    { name: "p250", displayName: "P250 / CZ-75", type: "pistol" },
+    { name: "sg556", displayName: "SG 553", type: "rifle" },
+    { name: "scar20", displayName: "SCAR-20", type: "rifle" },
+    { name: "ssg08", displayName: "SSG 08", type: "rifle" },
+    { name: "mp7", displayName: "MP7 / MP5-SD", type: "smg" },
+    { name: "mp9", displayName: "MP9", type: "smg" },
+    { name: "nova", displayName: "Nova", type: "heavy" },
+    { name: "negev", displayName: "Negev", type: "heavy" },
+    { name: "sawedoff", displayName: "Sawed-Off", type: "heavy" },
+    { name: "bizon", displayName: "PP-Bizon", type: "smg" },
+    { name: "tec9", displayName: "Tec-9", type: "pistol" },
+    { name: "mag7", displayName: "MAG-7", type: "heavy" },
+    { name: "m4a1", displayName: "M4A4 / M4A1-S", type: "rifle" },
+    { name: "galilar", displayName: "Galil", type: "rifle" },
+    { name: "molotov", displayName: "Molotov", type: "gear" },
+    { name: "taser", displayName: "Zeus x27", type: "gear" },
+]
+
+const mapsInfos = [
+    { name: "dust2", displayName: "Dust 2" },
+    { name: "italy", displayName: "Italy" },
+    { name: "office", displayName: "Office" },
+    { name: "cbble", displayName: "Cobblestone" },
+    { name: "inferno", displayName: "Inferno" },
+    { name: "nuke", displayName: "Nuke" },
+    { name: "train", displayName: "Train" },
+    { name: "lake", displayName: "Lake" },
+    { name: "safehouse", displayName: "Safehouse" },
+    { name: "stmarc", displayName: "Saint-Marc" },
+    { name: "house", displayName: "House" },
+    { name: "bank", displayName: "Bank" },
+    { name: "vertigo", displayName: "Vertigo" },
+    { name: "monastery", displayName: "Monastery" },
+    { name: "shoots", displayName: "Shoots" },
+    { name: "baggage", displayName: "Baggage" },
+]

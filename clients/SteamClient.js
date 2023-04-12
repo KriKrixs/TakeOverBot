@@ -44,4 +44,12 @@ export default class SteamClient {
 
         return response.response.players.length > 0 ? response.response.players[0] : null
     }
+
+    async getCsStats(steamid) {
+        const url = "http://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key=" + this.config.steam.apiKey + "&steamid=" + steamid
+
+        const { data: response } = await axios(url)
+
+        return response.playerstats.stats
+    }
 }

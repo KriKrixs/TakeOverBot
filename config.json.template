@@ -1,0 +1,13 @@
+{
+  "discord": {
+    "clientId": "",
+    "token": ""
+  },
+  "mongodb": {
+    "url": "",
+    "db": ""
+  },
+  "steam": {
+    "apiKey": ""
+  }
+}
