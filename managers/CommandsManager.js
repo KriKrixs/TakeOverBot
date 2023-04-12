@@ -1,22 +1,33 @@
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-
+/* Modules */
 import { REST, Routes, Events, Collection} from 'discord.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'url';
 
+/**
+ * CommandsManager class
+ */
 export default class CommandsManager {
+
+    /**
+     * CommandsManager's constructor
+     * @param opt (this of CSTrackerDiscord object)
+     */
     constructor(opt) {
         this.config = opt.config
         this.clients = opt.clients
     }
 
+    /**
+     * Load every command in the commands folder
+     * @returns {Promise<void>} Nothing
+     */
     async load() {
         this.clients.discord.getClient().commands = new Collection()
 
         const __filename = fileURLToPath(import.meta.url);
         const __dirname = path.dirname(__filename);
+
 
         const commands = []
         const commandsPath = path.join(__dirname, '/../commands');
@@ -55,7 +66,6 @@ export default class CommandsManager {
 
             if (!command) {
                 console.error(`No command matching ${interaction.commandName} was found.`);
-                return;
             }
 
             try {

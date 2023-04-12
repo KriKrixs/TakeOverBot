@@ -1,7 +1,8 @@
 {
   "discord": {
     "clientId": "",
-    "token": ""
+    "token": "",
+    "logWebhook": ""
   },
   "mongodb": {
     "url": "",

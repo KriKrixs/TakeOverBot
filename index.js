@@ -1,50 +1,73 @@
+/* Modules */
 import { ActivityType, Events } from "discord.js"
+
+/* Clients */
 import DiscordClient from "./clients/DiscordClient.js"
 import MongoDBClient from "./clients/MongoDBClient.js"
+import SteamClient from "./clients/SteamClient.js"
+
+/* Managers */
 import CommandsManager from "./managers/CommandsManager.js"
-import SteamClient from "./clients/SteamClient.js";
+
+/* Loggers */
+import Logger from "./loggers/Logger.js"
+
+/* Config */
 import config from "./config.json" assert {"type": "json"}
 
-class PlotBot {
+/**
+ * CSTrackerDiscord class
+ */
+class CSTrackerDiscord {
+
+    /**
+     * CSTrackerDiscord's constructor
+     */
     constructor() {
-        // Déclaration de la configuration
+        this.config     = config
 
-        this.config = config
-
-        // Instanciation des clients
-
-        this.clients = {
-            discord: new DiscordClient(this),
-            mongo: new MongoDBClient(this),
-            steam: new SteamClient(this)
-        };
-
-        // Instanciation des managers
-
-        this.managers = {
-            commands: new CommandsManager(this)
+        this.loggers    = {
+            logger: new Logger(this)
         }
 
-        // Initialisation du bot
+        this.clients    = {
+            discord : new DiscordClient(this),
+            mongo   : new MongoDBClient(this),
+            steam   : new SteamClient(this)
+        }
+
+        this.managers   = {
+            commands: new CommandsManager(this)
+        }
 
         this.init()
     }
 
+    /**
+     * Initialize the bot
+     * @returns {Promise<void>}
+     */
     async init() {
-        this.clients.discord.loginClient();
-        await this.clients.mongo.loginClient();
+        await this.loggers.logger.log("INFO", this.constructor.name, "Starting the bot")
 
+        // Login the discord & mongo client
+        this.clients.discord.loginClient()
+        await this.clients.mongo.loginClient()
+
+        // When the discord client is ready
         this.clients.discord.getClient().once(Events.ClientReady, async () => {
-            console.log("Discord: Ready.");
+            await this.loggers.logger.log("INFO", this.constructor.name, "Discord is ready")
 
+            // Set the presence activity
             await this.clients.discord.getClient().user.setPresence({
-                activities: [{ name: 'les plots jouer', type: ActivityType.Watching }]
-            });
+                activities: [{ name: 'your CS stats', type: ActivityType.Watching }]
+            })
 
+            // Load all the commands
             await this.managers.commands.load()
-        });
+        })
     }
-
 }
 
-new PlotBot();
+// Create a new instance of the discord bot
+new CSTrackerDiscord()

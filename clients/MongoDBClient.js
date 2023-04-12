@@ -11,7 +11,6 @@ export default class MongoDBClient {
     async loginClient() {
         await this.client.connect()
         this.db = this.client.db(this.config.mongodb.db)
-
     }
 
     findDocuments(collectionName, filter) {
