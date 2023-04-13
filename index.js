@@ -65,6 +65,8 @@ class CSTrackerDiscord {
 
             // Load all the commands
             await this.managers.commands.load()
+
+            await this.loggers.logger.log("INFO", this.constructor.name, "Bot is up!")
         })
     }
 }

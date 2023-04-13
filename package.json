@@ -1,6 +1,7 @@
 {
-  "name": "PlotBot",
-  "version": "0.0.1",
+  "name": "plotbot",
+  "displayName": "PlotBot",
+  "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
