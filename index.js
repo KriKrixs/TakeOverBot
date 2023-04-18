@@ -16,12 +16,12 @@ import Logger from "./loggers/Logger.js"
 import config from "./config.json" assert {"type": "json"}
 
 /**
- * CSTrackerDiscord class
+ * PlotBot class
  */
-class CSTrackerDiscord {
+class PlotBot {
 
     /**
-     * CSTrackerDiscord's constructor
+     * PlotBot's constructor
      */
     constructor() {
         this.config     = config
@@ -72,4 +72,4 @@ class CSTrackerDiscord {
 }
 
 // Create a new instance of the discord bot
-new CSTrackerDiscord()
+new PlotBot()

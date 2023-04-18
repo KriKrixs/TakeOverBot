@@ -8,7 +8,7 @@ export default class DiscordClient {
 
     /**
      * DiscordClient's constructor
-     * @param opt this of CSTrackerDiscord object
+     * @param opt this of PlotBot object
      */
     constructor(opt) {
         this.config     = opt.config;

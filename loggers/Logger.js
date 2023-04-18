@@ -12,7 +12,7 @@ export default class Logger {
 
     /**
      * Logger's constructor
-     * @param opt this of CSTrackerDiscord object
+     * @param opt this of PlotBot object
      */
     constructor(opt) {
         this.config = opt.config
