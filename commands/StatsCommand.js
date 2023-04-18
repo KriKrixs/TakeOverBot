@@ -98,7 +98,7 @@ export const execute = async (interaction, opt) => {
             switch(target) {
                 case "user":
                     // Process all the stats
-                    const timePlayed        = Math.round(csStats.filter(stat => stat.name === "total_time_played")[0]?.value ?? 0 / 3600 * 10) / 10
+                    const timePlayed        = Math.round((csStats.filter(stat => stat.name === "total_time_played")[0]?.value ?? 0) / 3600 * 10) / 10
                     matchesPlayed           = csStats.filter(stat => stat.name === "total_matches_played")[0]?.value ?? 0
                     const roundsPlayed      = csStats.filter(stat => stat.name === "total_rounds_played")[0]?.value ?? 0
                     wins                    = csStats.filter(stat => stat.name === "total_matches_won")[0]?.value ?? 0
@@ -257,16 +257,16 @@ export const execute = async (interaction, opt) => {
                     return interaction.editReply("WIP!")
                 default:
                     // Process all the user's stats
-                    matchesPlayed       = csStats.filter(stat => stat.name === "total_matches_played")[0].value
-                    wins                = csStats.filter(stat => stat.name === "total_matches_won")[0].value
+                    matchesPlayed       = csStats.filter(stat => stat.name === "total_matches_played")[0]?.value ?? 0
+                    wins                = csStats.filter(stat => stat.name === "total_matches_won")[0]?.value ?? 0
                     losses              = matchesPlayed - wins
                     winPercentage       = Math.round(wins * 100 / matchesPlayed * 10) / 10
-                    kills               = csStats.filter(stat => stat.name === "total_kills")[0].value
-                    deaths              = csStats.filter(stat => stat.name === "total_deaths")[0].value
+                    kills               = csStats.filter(stat => stat.name === "total_kills")[0]?.value ?? 0
+                    deaths              = csStats.filter(stat => stat.name === "total_deaths")[0]?.value ?? 0
                     kdRatio             = Math.round(kills / deaths * 100) / 100
-                    headshotKills       = csStats.filter(stat => stat.name === "total_kills_headshot")[0].value
+                    headshotKills       = csStats.filter(stat => stat.name === "total_kills_headshot")[0]?.value ?? 0
                     headshotPercentage  = Math.round(headshotKills * 100 / kills * 10) / 10
-                    mvps                = csStats.filter(stat => stat.name === "total_mvps")[0].value
+                    mvps                = csStats.filter(stat => stat.name === "total_mvps")[0]?.value ?? 0
 
                     // Add infos into the embed
                     embed.setTitle(discordUserInDb[0].steamName + " - " + "Overall stats")
