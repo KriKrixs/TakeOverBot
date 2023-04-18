@@ -29,7 +29,7 @@ export default class SteamClient {
                 .replace('steamcommunity.com/id/', '')
                 .replace('https://', '')
                 .replace('http://', '')
-                .replace('/', '')
+                .split("/")[0]
 
             // Resolve the vanity name into the SteamID64
             const url = "https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + this.config.steam.apiKey + "&vanityurl=" + vanity
@@ -54,7 +54,7 @@ export default class SteamClient {
                 .replace('steamcommunity.com/profiles/', '')
                 .replace('https://', '')
                 .replace('http://', '')
-                .replace('/', '')
+                .split("/")[0]
         } else {
             return false
         }
