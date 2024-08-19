@@ -1,5 +1,5 @@
 /* Modules */
-import { Events } from "discord.js"
+import { Events, ActivityType } from "discord.js"
 
 /* Clients */
 import DiscordClient from "./clients/DiscordClient.js"
@@ -51,7 +51,7 @@ class PlotBot {
         await this.loggers.logger.log("INFO", this.constructor.name, "Starting the bot")
 
         // Login the discord & mongo client
-        this.clients.discord.loginClient()
+        await this.clients.discord.loginClient()
         await this.clients.mongo.loginClient()
 
         // When the discord client is ready
@@ -59,8 +59,8 @@ class PlotBot {
             await this.loggers.logger.log("INFO", this.constructor.name, "Discord is ready")
 
             // Set the presence activity
-            await this.clients.discord.getClient().user.setPresence({
-                activities: [{ name: 'your CS stats', type: "WATCHING" }]
+            this.clients.discord.getClient().user.setPresence({
+                activities: [{ name: 'tes stats CS2', type: ActivityType.Watching }]
             })
 
             // Load all the commands
@@ -71,5 +71,9 @@ class PlotBot {
     }
 }
 
-// Create a new instance of the discord bot
-new PlotBot()
+try {
+    // Create a new instance of the discord bot
+    new PlotBot()
+} catch (e) {
+    console.error(e);
+}

@@ -6,7 +6,7 @@ import {fileURLToPath} from "url";
 /**
  * Unlink command's data
  * This command allow the user to unlink a game platform account from his discord account
- * @returns {Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">}
+ * @returns SlashCommandOptionsOnlyBuilder
  */
 export const data = () => {
     return new SlashCommandBuilder()

@@ -6,7 +6,7 @@ import {fileURLToPath} from "url";
 /**
  * Link command's data
  * This command allow the user to link a game platform account to his discord account
- * @returns {Omit<, "addSubcommand" | "addSubcommandGroup">} SlashCommand
+ * @returns SlashCommandOptionsOnlyBuilder
  */
 export const data = () => {
     return new SlashCommandBuilder()

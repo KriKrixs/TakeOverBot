@@ -74,10 +74,7 @@ export const execute = async (interaction, opt) => {
             // Reply to the interaction
             return interaction.editReply("There is no Steam account linked to this user")
         } else {
-            // Declare all the variable, so we don't have multiple names for the same data
-            let csStats, wins, losses, winPercentage, matchesPlayed, kills, deaths, kdRatio, headshotPercentage, headshotKills, mvps, weaponsKillsStats, mapsRoundsStats
-
-            csStats = await opt.clients.steam.getCsStats(discordUserInDb[0].steamId)
+            const csStats = await opt.clients.steam.getCsStats(discordUserInDb[0].steamId)
 
             // If an error occurred
             if(csStats === false) {
@@ -97,237 +94,257 @@ export const execute = async (interaction, opt) => {
 
             switch(target) {
                 case "user":
-                    // Process all the stats
-                    const timePlayed        = Math.round((csStats.filter(stat => stat.name === "total_time_played")[0]?.value ?? 0) / 3600 * 10) / 10
-                    matchesPlayed           = csStats.filter(stat => stat.name === "total_matches_played")[0]?.value ?? 0
-                    const roundsPlayed      = csStats.filter(stat => stat.name === "total_rounds_played")[0]?.value ?? 0
-                    wins                    = csStats.filter(stat => stat.name === "total_matches_won")[0]?.value ?? 0
-                    losses                  = matchesPlayed - wins
-                    winPercentage           = Math.round(wins * 100 / matchesPlayed * 10) / 10
-                    kills                   = csStats.filter(stat => stat.name === "total_kills")[0]?.value ?? 0
-                    deaths                  = csStats.filter(stat => stat.name === "total_deaths")[0]?.value ?? 0
-                    kdRatio                 = Math.round(kills / deaths * 100) / 100
-                    headshotKills           = csStats.filter(stat => stat.name === "total_kills_headshot")[0]?.value ?? 0
-                    headshotPercentage      = Math.round(headshotKills * 100 / kills * 10) / 10
-                    mvps                    = csStats.filter(stat => stat.name === "total_mvps")[0]?.value ?? 0
-                    const shotsFired        = csStats.filter(stat => stat.name === "total_shots_fired")[0]?.value ?? 0
-                    const shotsHit          = csStats.filter(stat => stat.name === "total_shots_hit")[0]?.value ?? 0
-                    const shotsAccuracy     = Math.round(shotsHit * 100 / shotsFired * 10) / 10
-                    const bombsPlanted      = csStats.filter(stat => stat.name === "total_planted_bombs")[0]?.value ?? 0
-                    const bombsDefused      = csStats.filter(stat => stat.name === "total_defused_bombs")[0]?.value ?? 0
-                    const hostagesRescued   = csStats.filter(stat => stat.name === "total_rescued_hostages")[0]?.value ?? 0
-
-                    // Add infos into the embed
-                    embed.setTitle(discordUserInDb[0].steamName + " - " + "User stats")
-                        .addFields(
-                            { name: 'Time Played'       , value: timePlayed + "h"           , inline: true },
-                            { name: 'Matches Played'    , value: matchesPlayed.toString()   , inline: true },
-                            { name: 'Rounds Played'     , value: roundsPlayed.toString()    , inline: true },
-                            { name: 'Win %'             , value: winPercentage + "%"        , inline: true },
-                            { name: 'Wins'              , value: wins.toString()            , inline: true },
-                            { name: 'Losses'            , value: losses.toString()          , inline: true },
-                            { name: 'K/D'               , value: kdRatio.toString()         , inline: true },
-                            { name: 'Kills'             , value: kills.toString()           , inline: true},
-                            { name: 'Deaths'            , value: deaths.toString()          , inline: true},
-                            { name: 'Headshot %'        , value: headshotPercentage + "%"   , inline: true},
-                            { name: 'Headshots'         , value: headshotKills.toString()   , inline: true},
-                            { name: 'MVP'               , value: mvps.toString()            , inline: true},
-                            { name: 'Shots Accuracy'    , value: shotsAccuracy + "%"        , inline: true},
-                            { name: 'Shots Fired'       , value: shotsFired.toString()      , inline: true},
-                            { name: 'Shots Hit'         , value: shotsHit.toString()        , inline: true},
-                            { name: 'Bombs Planted'     , value: bombsPlanted.toString()    , inline: true},
-                            { name: 'Bombs Defused'     , value: bombsDefused.toString()    , inline: true},
-                            { name: 'Hostages Rescued'  , value: hostagesRescued.toString() , inline: true}
-                        )
-
-                    // Reply to the interaction with the embed
-                    return interaction.editReply({ embeds: [embed] })
+                    return caseCS2User(csStats, embed, discordUserInDb, interaction);
                 case "rifle":
                 case "pistol":
                 case "smg":
                 case "heavy":
                 case "gear":
                 case "weapon":
-                    // Process all the weapons stats and sort it by the number of kills
-                    weaponsKillsStats = csStats.filter(stat => stat.name.startsWith("total_kills") && !["total_kills", "total_kills_headshot", "total_kills_enemy_weapon", "total_kills_against_zoomed_sniper", "total_kills_enemy_blinded", "total_kills_knife_fight"].includes(stat.name)).sort((a, b) => {
-                        if(a.value > b.value)
-                            return -1
-                    })
-
-                    // Change the title depending on which weapons stats the user want
-                    let title
-
-                    switch (target) {
-                        case "rifle":
-                            title = " - Rifle weapons stats"
-                            break;
-                        case "pistol":
-                            title = " - Pistol weapons stats"
-                            break;
-                        case "smg":
-                            title = " - SMG weapons stats"
-                            break;
-                        case "heavy":
-                            title = " - Heavy weapons stats"
-                            break;
-                        case "gear":
-                            title = " - Gear weapons stats"
-                            break;
-                        default:
-                            title = " - All weapons stats"
-                            break;
-                    }
-
-                    // Add the title to the embed
-                    embed.setTitle(discordUserInDb[0].steamName + title)
-
-                    // Loop to fill 8 lines of fields. "y" is for the weapon, "i" is for the fields line
-                    let y = 0
-
-                    for(let i = 0; i < 8; i) {
-                        const weapon = weaponsKillsStats[y]
-
-                        // If there is no more weapon, stop the loop
-                        if(weapon === undefined)
-                            break
-
-                        y++
-
-                        // Fetch the weapon name and the weapon infos
-                        const weaponName    = weapon.name.split('_').at(-1)
-                        const weaponInfos   = weaponsInfos.filter(info => info.name === weaponName)[0]
-
-                        // If the user want a specific weapon type and the current weapon don't respond to this, continue to the next weapon
-                        if(target !== "weapon" && weaponInfos.type !== target)
-                            continue
-
-                        // Process all the stats
-                        const weaponShots   = csStats.filter(stat => stat.name === "total_shots_" + weaponName)
-                        const weaponHits    = csStats.filter(stat => stat.name === "total_hits_" + weaponName)
-                        let accuracy        = weaponHits.length > 0 ? (Math.round(weaponHits[0].value * 100 / weaponShots[0].value * 10) / 10) : null
-
-                        // If the weapon is the taser, we have to manually calculate the accuracy
-                        if(weaponName === "taser")
-                            accuracy = (Math.round(weapon.value * 100 / weaponShots[0].value * 10) / 10)
-
-                        // Add the weapon into the embed's fields
-                        embed.addFields(
-                            { name: weaponInfos.displayName + " - Kills"        , value: weapon.value.toString()                        , inline: true },
-                            { name: accuracy !== null ? "Accuracy" : '\u200B'   , value: accuracy !== null ? (accuracy + "%") : '\u200B', inline: true },
-                            { name: '\u200B'                                    , value: '\u200B'                                       , inline: true },
-                        )
-
-                        i++
-                    }
-
-                    // Reply to the interaction with the embed
-                    return interaction.editReply({ embeds: [embed] });
+                    return caseCS2Weapons(csStats, target, embed, discordUserInDb, interaction);
                 case "map":
-                    // Process all the maps stats and sort it by the number of rounds played
-                    mapsRoundsStats = csStats.filter(stat => stat.name.startsWith("total_rounds_map")).sort((a, b) => {
-                        if(a.value > b.value)
-                            return -1
-                    })
-
-                    // Add the title to the embed
-                    embed.setTitle(discordUserInDb[0].steamName + " - " + "Maps stats")
-
-                    // Loop to fill 8 lines of fields
-                    for(let i = 0; i < 8; i++) {
-                        const map = mapsRoundsStats[i]
-
-                        // Process all the stats
-                        const mapName           = map.name.split("_").at(-1)
-                        console.log(mapName);
-                        const mapInfos          = mapsInfos.filter(info => info.name === mapName)[0]
-                        const mapWins           = csStats.filter(stat => stat.name.startsWith("total_wins_map") && stat.name.endsWith(mapName))[0]
-                        const mapWinsPercentage = Math.floor(mapWins.value * 100 / map.value * 10) / 10
-
-                        // Add the map into the embed's fields
-                        embed.addFields(
-                            { name: mapInfos.displayName + " - Rounds"  , value: map.value.toString()       , inline: true },
-                            { name: "Round Win %"                       , value: mapWinsPercentage + "%"    , inline: true },
-                            { name: "Round Win"                         , value: mapWins.value.toString()   , inline: true },
-                        )
-                    }
-
-                    // Reply to the interaction with the embed
-                    return interaction.editReply({ embeds: [embed] })
+                    return caseCS2Maps(csStats, embed, discordUserInDb, interaction);
                 case "last_match":
-                    // TODO: WIP!
                     return interaction.editReply("WIP!")
                 default:
-                    // Process all the user's stats
-                    matchesPlayed       = csStats.filter(stat => stat.name === "total_matches_played")[0]?.value ?? 0
-                    wins                = csStats.filter(stat => stat.name === "total_matches_won")[0]?.value ?? 0
-                    losses              = matchesPlayed - wins
-                    winPercentage       = Math.round(wins * 100 / matchesPlayed * 10) / 10
-                    kills               = csStats.filter(stat => stat.name === "total_kills")[0]?.value ?? 0
-                    deaths              = csStats.filter(stat => stat.name === "total_deaths")[0]?.value ?? 0
-                    kdRatio             = Math.round(kills / deaths * 100) / 100
-                    headshotKills       = csStats.filter(stat => stat.name === "total_kills_headshot")[0]?.value ?? 0
-                    headshotPercentage  = Math.round(headshotKills * 100 / kills * 10) / 10
-                    mvps                = csStats.filter(stat => stat.name === "total_mvps")[0]?.value ?? 0
-
-                    // Add infos into the embed
-                    embed.setTitle(discordUserInDb[0].steamName + " - " + "Overall stats")
-                        .addFields(
-                            { name: 'Win %'     , value: winPercentage + "%"        , inline: true },
-                            { name: 'Wins'      , value: wins.toString()            , inline: true },
-                            { name: 'Losses'    , value: losses.toString()          , inline: true },
-                            { name: 'K/D'       , value: kdRatio.toString()         , inline: true },
-                            { name: 'Kills'     , value: kills.toString()           , inline: true},
-                            { name: 'Deaths'    , value: deaths.toString()          , inline: true},
-                            { name: 'Headshot %', value: headshotPercentage + "%"   , inline: true},
-                            { name: 'Headshots' , value: headshotKills.toString()   , inline: true},
-                            { name: 'MVP'       , value: mvps.toString()            , inline: true},
-                        )
-
-                    // Process all the weapons stats and sort it by the number of kills
-                    weaponsKillsStats = csStats.filter(stat => stat.name.startsWith("total_kills") && !["total_kills", "total_kills_headshot", "total_kills_enemy_weapon", "total_kills_against_zoomed_sniper", "total_kills_enemy_blinded", "total_kills_knife_fight"].includes(stat.name)).sort((a, b) => {
-                        if(a.value > b.value)
-                            return -1
-                    })
-
-                    // Loop to fill 1 line of fields
-                    for(let i = 0; i < 3; i++) {
-                        const weapon = weaponsKillsStats[i]
-
-                        // Fetch the weapon name and infos
-                        const weaponName    = weapon.name.split('_').at(-1)
-                        const weaponInfos   = weaponsInfos.filter(info => info.name === weaponName)[0]
-
-                        // Add the info into the embed
-                        embed.addFields(
-                            { name: weaponInfos.displayName + " - Kills", value: weapon.value.toString(), inline: true}
-                        )
-                    }
-
-                    // Process all the maps stats and sort it by the number of rounds played
-                    mapsRoundsStats = csStats.filter(stat => stat.name.startsWith("total_rounds_map")).sort((a, b) => {
-                        if(a.value > b.value)
-                            return -1
-                    })
-
-                    // Loop to fill 1 line of fields
-                    for(let i = 0; i < 3; i++) {
-                        const map = mapsRoundsStats[i]
-
-                        // Fetch the map name and infos
-                        const mapName   = map.name.split("_").at(-1)
-                        const mapInfos  = mapsInfos.filter(info => info.name === mapName)[0]
-
-                        // Add the info into the embed
-                        embed.addFields(
-                            { name: mapInfos.displayName + " - Rounds", value: map.value.toString(), inline: true },
-                        )
-                    }
-
-                    // Reply to the interaction with the embed
-                    return interaction.editReply({ embeds: [embed] })
+                    return caseCS2Overall(csStats, embed, discordUserInDb, interaction);
             }
         }
     }
+}
+
+const caseCS2User = (csStats, embed, discordUserInDb, interaction) => {
+    // Process all the stats
+    const timePlayed            = Math.round((csStats.filter(stat => stat.name === "total_time_played")[0]?.value ?? 0) / 3600 * 10) / 10
+    const matchesPlayed         = csStats.filter(stat => stat.name === "total_matches_played")[0]?.value ?? 0
+    const roundsPlayed          = csStats.filter(stat => stat.name === "total_rounds_played")[0]?.value ?? 0
+    const wins                  = csStats.filter(stat => stat.name === "total_matches_won")[0]?.value ?? 0
+    const losses                = matchesPlayed - wins
+    const winPercentage         = Math.round(wins * 100 / matchesPlayed * 10) / 10
+    const kills                 = csStats.filter(stat => stat.name === "total_kills")[0]?.value ?? 0
+    const deaths                = csStats.filter(stat => stat.name === "total_deaths")[0]?.value ?? 0
+    const kdRatio               = Math.round(kills / deaths * 100) / 100
+    const headshotKills         = csStats.filter(stat => stat.name === "total_kills_headshot")[0]?.value ?? 0
+    const headshotPercentage    = Math.round(headshotKills * 100 / kills * 10) / 10
+    const mvps                  = csStats.filter(stat => stat.name === "total_mvps")[0]?.value ?? 0
+    const shotsFired            = csStats.filter(stat => stat.name === "total_shots_fired")[0]?.value ?? 0
+    const shotsHit              = csStats.filter(stat => stat.name === "total_shots_hit")[0]?.value ?? 0
+    const shotsAccuracy         = Math.round(shotsHit * 100 / shotsFired * 10) / 10
+    const bombsPlanted          = csStats.filter(stat => stat.name === "total_planted_bombs")[0]?.value ?? 0
+    const bombsDefused          = csStats.filter(stat => stat.name === "total_defused_bombs")[0]?.value ?? 0
+    const hostagesRescued       = csStats.filter(stat => stat.name === "total_rescued_hostages")[0]?.value ?? 0
+
+    // Add infos into the embed
+    embed.setTitle(discordUserInDb[0].steamName + " - " + "User stats")
+        .addFields(
+            { name: 'Time Played'       , value: timePlayed + "h"           , inline: true },
+            { name: 'Matches Played'    , value: matchesPlayed.toString()   , inline: true },
+            { name: 'Rounds Played'     , value: roundsPlayed.toString()    , inline: true },
+            { name: 'Win %'             , value: winPercentage + "%"        , inline: true },
+            { name: 'Wins'              , value: wins.toString()            , inline: true },
+            { name: 'Losses'            , value: losses.toString()          , inline: true },
+            { name: 'K/D'               , value: kdRatio.toString()         , inline: true },
+            { name: 'Kills'             , value: kills.toString()           , inline: true},
+            { name: 'Deaths'            , value: deaths.toString()          , inline: true},
+            { name: 'Headshot %'        , value: headshotPercentage + "%"   , inline: true},
+            { name: 'Headshots'         , value: headshotKills.toString()   , inline: true},
+            { name: 'MVP'               , value: mvps.toString()            , inline: true},
+            { name: 'Shots Accuracy'    , value: shotsAccuracy + "%"        , inline: true},
+            { name: 'Shots Fired'       , value: shotsFired.toString()      , inline: true},
+            { name: 'Shots Hit'         , value: shotsHit.toString()        , inline: true},
+            { name: 'Bombs Planted'     , value: bombsPlanted.toString()    , inline: true},
+            { name: 'Bombs Defused'     , value: bombsDefused.toString()    , inline: true},
+            { name: 'Hostages Rescued'  , value: hostagesRescued.toString() , inline: true}
+        )
+
+    // Reply to the interaction with the embed
+    return interaction.editReply({ embeds: [embed] })
+}
+
+const caseCS2Weapons = (csStats, target, embed, discordUserInDb, interaction) => {
+    // Process all the weapons stats and sort it by the number of kills
+    const weaponsKillsStats = csStats.filter(stat => stat.name.startsWith("total_kills") && !["total_kills", "total_kills_headshot", "total_kills_enemy_weapon", "total_kills_against_zoomed_sniper", "total_kills_enemy_blinded", "total_kills_knife_fight"].includes(stat.name)).sort((a, b) => {
+        if(a.value > b.value)
+            return -1
+    })
+
+    // Change the title depending on which weapons stats the user want
+    let title
+
+    switch (target) {
+        case "rifle": {
+            title = " - Rifle weapons stats"
+            break;
+        }
+        case "pistol": {
+            title = " - Pistol weapons stats"
+            break;
+        }
+        case "smg": {
+            title = " - SMG weapons stats"
+            break;
+        }
+        case "heavy": {
+            title = " - Heavy weapons stats"
+            break;
+        }
+        case "gear": {
+            title = " - Gear weapons stats"
+            break;
+        }
+        default: {
+            title = " - All weapons stats"
+            break;
+        }
+    }
+
+    // Add the title to the embed
+    embed.setTitle(discordUserInDb[0].steamName + title)
+
+    // Loop to fill 8 lines of fields. "y" is for the weapon, "i" is for the fields line
+    let y = 0
+
+    for(let i = 0; i < 8; i) {
+        const weapon = weaponsKillsStats[y]
+
+        // If there is no more weapon, stop the loop
+        if(weapon === undefined)
+            break
+
+        y++
+
+        // Fetch the weapon name and the weapon infos
+        const weaponName    = weapon.name.split('_').at(-1)
+        const weaponInfos   = weaponsInfos.filter(info => info.name === weaponName)[0]
+
+        // If the user want a specific weapon type and the current weapon don't respond to this, continue to the next weapon
+        if(target !== "weapon" && weaponInfos.type !== target)
+            continue
+
+        // Process all the stats
+        const weaponShots   = csStats.filter(stat => stat.name === "total_shots_" + weaponName)
+        const weaponHits    = csStats.filter(stat => stat.name === "total_hits_" + weaponName)
+        let accuracy        = weaponHits.length > 0 ? (Math.round(weaponHits[0].value * 100 / weaponShots[0].value * 10) / 10) : null
+
+        // If the weapon is the taser, we have to manually calculate the accuracy
+        if(weaponName === "taser")
+            accuracy = (Math.round(weapon.value * 100 / weaponShots[0].value * 10) / 10)
+
+        // Add the weapon into the embed's fields
+        embed.addFields(
+            { name: weaponInfos.displayName + " - Kills"        , value: weapon.value.toString()                        , inline: true },
+            { name: accuracy !== null ? "Accuracy" : '\u200B'   , value: accuracy !== null ? (accuracy + "%") : '\u200B', inline: true },
+            { name: '\u200B'                                    , value: '\u200B'                                       , inline: true },
+        )
+
+        i++
+    }
+
+    // Reply to the interaction with the embed
+    return interaction.editReply({ embeds: [embed] });
+}
+
+const caseCS2Maps = (csStats, embed, discordUserInDb, interaction) => {
+    // Process all the maps stats and sort it by the number of rounds played
+    const mapsRoundsStats = csStats.filter(stat => stat.name.startsWith("total_rounds_map")).sort((a, b) => {
+        if(a.value > b.value)
+            return -1
+    })
+
+    // Add the title to the embed
+    embed.setTitle(discordUserInDb[0].steamName + " - " + "Maps stats")
+
+    // Loop to fill 8 lines of fields
+    for(let i = 0; i < 8; i++) {
+        const map = mapsRoundsStats[i]
+
+        // Process all the stats
+        const mapName           = map.name.split("_").at(-1)
+        const mapInfos          = mapsInfos.filter(info => info.name === mapName)[0]
+        const mapWins           = csStats.filter(stat => stat.name.startsWith("total_wins_map") && stat.name.endsWith(mapName))[0]
+        const mapWinsPercentage = Math.floor(mapWins.value * 100 / map.value * 10) / 10
+
+        // Add the map into the embed's fields
+        embed.addFields(
+            { name: mapInfos.displayName + " - Rounds"  , value: map.value.toString()       , inline: true },
+            { name: "Round Win %"                       , value: mapWinsPercentage + "%"    , inline: true },
+            { name: "Round Win"                         , value: mapWins.value.toString()   , inline: true },
+        )
+    }
+
+    // Reply to the interaction with the embed
+    return interaction.editReply({ embeds: [embed] })
+}
+
+const caseCS2Overall = (csStats, embed, discordUserInDb, interaction) => {
+    // Process all the user's stats
+    const matchesPlayed       = csStats.filter(stat => stat.name === "total_matches_played")[0]?.value ?? 0
+    const wins                = csStats.filter(stat => stat.name === "total_matches_won")[0]?.value ?? 0
+    const losses              = matchesPlayed - wins
+    const winPercentage       = Math.round(wins * 100 / matchesPlayed * 10) / 10
+    const kills               = csStats.filter(stat => stat.name === "total_kills")[0]?.value ?? 0
+    const deaths              = csStats.filter(stat => stat.name === "total_deaths")[0]?.value ?? 0
+    const kdRatio             = Math.round(kills / deaths * 100) / 100
+    const headshotKills       = csStats.filter(stat => stat.name === "total_kills_headshot")[0]?.value ?? 0
+    const headshotPercentage  = Math.round(headshotKills * 100 / kills * 10) / 10
+    const mvps                = csStats.filter(stat => stat.name === "total_mvps")[0]?.value ?? 0
+
+    // Add infos into the embed
+    embed.setTitle(discordUserInDb[0].steamName + " - " + "Overall stats")
+        .addFields(
+            { name: 'Win %'     , value: winPercentage + "%"        , inline: true },
+            { name: 'Wins'      , value: wins.toString()            , inline: true },
+            { name: 'Losses'    , value: losses.toString()          , inline: true },
+            { name: 'K/D'       , value: kdRatio.toString()         , inline: true },
+            { name: 'Kills'     , value: kills.toString()           , inline: true},
+            { name: 'Deaths'    , value: deaths.toString()          , inline: true},
+            { name: 'Headshot %', value: headshotPercentage + "%"   , inline: true},
+            { name: 'Headshots' , value: headshotKills.toString()   , inline: true},
+            { name: 'MVP'       , value: mvps.toString()            , inline: true},
+        )
+
+    // Process all the weapons stats and sort it by the number of kills
+    const weaponsKillsStats = csStats.filter(stat => stat.name.startsWith("total_kills") && !["total_kills", "total_kills_headshot", "total_kills_enemy_weapon", "total_kills_against_zoomed_sniper", "total_kills_enemy_blinded", "total_kills_knife_fight"].includes(stat.name)).sort((a, b) => {
+        if(a.value > b.value)
+            return -1
+    })
+
+    // Loop to fill 1 line of fields
+    for(let i = 0; i < 3; i++) {
+        const weapon = weaponsKillsStats[i]
+
+        // Fetch the weapon name and infos
+        const weaponName    = weapon.name.split('_').at(-1)
+        const weaponInfos   = weaponsInfos.filter(info => info.name === weaponName)[0]
+
+        // Add the info into the embed
+        embed.addFields(
+            { name: weaponInfos.displayName + " - Kills", value: weapon.value.toString(), inline: true}
+        )
+    }
+
+    // Process all the maps stats and sort it by the number of rounds played
+    const mapsRoundsStats = csStats.filter(stat => stat.name.startsWith("total_rounds_map")).sort((a, b) => {
+        if(a.value > b.value)
+                            return -1
+    })
+
+    // Loop to fill 1 line of fields
+    for(let i = 0; i < 3; i++) {
+        const map = mapsRoundsStats[i]
+
+        // Fetch the map name and infos
+        const mapName   = map.name.split("_").at(-1)
+        const mapInfos  = mapsInfos.filter(info => info.name === mapName)[0]
+
+        // Add the info into the embed
+        embed.addFields(
+            { name: mapInfos.displayName + " - Rounds", value: map.value.toString(), inline: true },
+        )
+    }
+
+    // Reply to the interaction with the embed
+    return interaction.editReply({ embeds: [embed] })
 }
 
 /**

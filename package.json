@@ -11,7 +11,6 @@
   "author": "Kylian BARUSSEAU",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.7.4",
     "discord.js": "^14.15.3",
     "mongodb": "^6.8.0"
   },

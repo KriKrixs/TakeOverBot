@@ -12,7 +12,7 @@ import nodePackage from "../package.json" assert {"type": "json"}
 /**
  * Steam command's data
  * This command allow the user to display steam info of a profile
- * @returns {SlashCommandBuilder}
+ * @returns SlashCommandOptionsOnlyBuilder
  */
 export const data = () => {
     return new SlashCommandBuilder()
@@ -24,6 +24,12 @@ export const data = () => {
         )
 }
 
+/**
+ * Steam command execution
+ * @param interaction       Discord interaction
+ * @param opt               this of CommandsManager object
+ * @returns {Promise<void>} Nothing
+ */
 export const execute = async (interaction, opt) => {
     // Allow more time to handle the interaction
     await interaction.deferReply()

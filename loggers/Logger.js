@@ -1,6 +1,5 @@
 /* Modules */
 import { appendFileSync, existsSync, mkdirSync } from "fs";
-import axios from "axios";
 
 /* Functions */
 import {dateToHumanFormat} from "../functions.js";
@@ -43,7 +42,15 @@ export default class Logger {
 
         // Send the log on discord through a webhook
         try {
-            await axios.post(this.config.discord.logWebhook, {content: "__**" + state + "**__ - " + dateToHumanFormat(new Date()) + " - [" + className + "] " + text})
+            await fetch(this.config.discord.logWebhook, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    content: `__**${state}**__ - ${dateToHumanFormat(new Date())} - [${className}] ${text}`
+                }),
+            });
         } catch (e) {
             appendFileSync(file, "WARNING - [" + this.constructor.name + "] " + e.message + "\n")
         }

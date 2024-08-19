@@ -21,9 +21,9 @@ export default class DiscordClient {
     /**
      * Log the discord client in
      */
-    loginClient() {
+    async loginClient() {
         try {
-            this.client.login(this.config.discord.token);
+            await this.client.login(this.config.discord.token);
         } catch (e) {
             this.loggers.log("CRITICAL", this.constructor.name, "Can't login to discord - " + e.message)
         }

@@ -1,6 +1,3 @@
-/* Modules */
-import axios from "axios"
-
 /**
  * SteamClient class
  */
@@ -35,15 +32,16 @@ export default class SteamClient {
             const url = "https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + this.config.steam.apiKey + "&vanityurl=" + vanity
 
             try {
-                const { data: response } = await axios(url)
+                const response = await fetch(url)
+                const responseJson = await response.json();
 
-                if(response.response.success !== 1) {
-                    await this.loggers.logger.log("WARNING", this.constructor.name, "Can't resolve the vanity URL - " + response.response.message)
+                if(responseJson.response.success !== 1) {
+                    await this.loggers.logger.log("WARNING", this.constructor.name, "Can't resolve the vanity URL - " + responseJson.response.message)
 
                     return false
                 }
 
-                steamid = response.response.steamid
+                steamid = responseJson.response.steamid
             } catch (e) {
                 await this.loggers.logger.log("WARNING", this.constructor.name, "Can't resolve the vanity URL - " + e.message)
 
@@ -71,9 +69,10 @@ export default class SteamClient {
         const url = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=" + this.config.steam.apiKey + "&steamids=" + steamid
 
         try {
-            const { data: response } = await axios(url)
+            const response = await fetch(url);
+            const responseJson = await response.json();
 
-            return response.response.players.length > 0 ? response.response.players[0] : null
+            return responseJson.response.players.length > 0 ? responseJson.response.players[0] : null
         } catch (e) {
             await this.loggers.logger.log("WARNING", this.constructor.name, "Can't fetch steam user's infos - " + e.message)
 
@@ -88,12 +87,13 @@ export default class SteamClient {
      * @returns {*}     Counter-Strike user's stats or false if an error occurred
      */
     async getCsStats(steamid) {
-        const url = "http://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key=" + this.config.steam.apiKey + "&steamid=" + steamid
+        const url = "https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key=" + this.config.steam.apiKey + "&steamid=" + steamid
 
         try {
-            const { data: response } = await axios(url)
+            const response = await fetch(url)
+            const responseJson = await response.json();
 
-            return response.playerstats.stats
+            return responseJson.playerstats.stats
         } catch (e) {
             await this.loggers.logger.log("WARNING", this.constructor.name, "Can't fetch Counter-Strike user's stats - " + e.message)
 
