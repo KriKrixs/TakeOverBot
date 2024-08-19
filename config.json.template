@@ -5,8 +5,8 @@
     "logWebhook": ""
   },
   "mongodb": {
-    "url": "",
-    "db": ""
+    "url": "mongodb://",
+    "db": "cstracker_prod"
   },
   "steam": {
     "apiKey": ""
