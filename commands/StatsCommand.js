@@ -20,7 +20,7 @@ export const data = () => {
                 .setDescription("Select a game")
                 .setRequired(true)
                 .addChoices(
-                    {name: 'CS:GO', value: 'csgo'}
+                    {name: 'CS2', value: 'cs2'}
                 )
         )
         .addStringOption(option =>
@@ -57,7 +57,7 @@ export const execute = async (interaction, opt) => {
     // If the user is not selected, select the user that executed the command
     const user      = interaction.options.getUser("user") ?? interaction.user
 
-    if(game === "csgo") {
+    if(game === "cs2") {
         // Fetch the user in the database
         const discordUserInDb = await opt.clients.mongo.findDocuments("users", { discordId: user.id, steamId: { $exists: true } })
 
@@ -238,6 +238,7 @@ export const execute = async (interaction, opt) => {
 
                         // Process all the stats
                         const mapName           = map.name.split("_").at(-1)
+                        console.log(mapName);
                         const mapInfos          = mapsInfos.filter(info => info.name === mapName)[0]
                         const mapWins           = csStats.filter(stat => stat.name.startsWith("total_wins_map") && stat.name.endsWith(mapName))[0]
                         const mapWinsPercentage = Math.floor(mapWins.value * 100 / map.value * 10) / 10
@@ -390,6 +391,8 @@ const mapsInfos = [
     { name: "monastery" , displayName: "Monastery" },
     { name: "shoots"    , displayName: "Shoots" },
     { name: "baggage"   , displayName: "Baggage" },
+    { name: "thera"     , displayName: "Thera" },
+    { name: "mills"     , displayName: "Mills" },
 ]
 
 const fileName = path.basename(fileURLToPath(import.meta.url), '.js')

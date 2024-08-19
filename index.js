@@ -1,5 +1,5 @@
 /* Modules */
-import { ActivityType, Events } from "discord.js"
+import { Events } from "discord.js"
 
 /* Clients */
 import DiscordClient from "./clients/DiscordClient.js"
@@ -60,7 +60,7 @@ class PlotBot {
 
             // Set the presence activity
             await this.clients.discord.getClient().user.setPresence({
-                activities: [{ name: 'your CS stats', type: ActivityType.Watching }]
+                activities: [{ name: 'your CS stats', type: "WATCHING" }]
             })
 
             // Load all the commands
