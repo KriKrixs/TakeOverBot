@@ -15,7 +15,7 @@ export default class DiscordClient {
         this.loggers    = opt.loggers
 
         // Creating the client with the intent of fetching guilds
-        this.client = new Client({ intents: [GatewayIntentBits.Guilds] });
+        this.client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages] });
     }
 
     /**
@@ -25,7 +25,7 @@ export default class DiscordClient {
         try {
             await this.client.login(this.config.discord.token);
         } catch (e) {
-            this.loggers.log("CRITICAL", this.constructor.name, "Can't login to discord - " + e.message)
+            this.loggers.logger.log("CRITICAL", this.constructor.name, "Can't login to discord - " + e.message)
         }
     }
 

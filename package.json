@@ -1,8 +1,8 @@
 {
-  "name": "plotbot",
-  "displayName": "PlotBot",
-  "version": "1.0.0",
-  "description": "Ce bot discord permet de suivre ces stats sur divers jeux dont notamment CS2.",
+  "name": "takeoverbot",
+  "displayName": "Bot TakeOver",
+  "version": "0.0.1",
+  "description": "Bot discord pour Take Over Motorsport",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -11,8 +11,8 @@
   "author": "Kylian BARUSSEAU",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^14.15.3",
-    "mongodb": "^6.8.0"
+    "discord.js": "^14.17.3",
+    "mongodb": "^6.13.0"
   },
   "type": "module"
 }

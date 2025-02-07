@@ -13,15 +13,19 @@ import CommandsManager from "./managers/CommandsManager.js"
 import Logger from "./loggers/Logger.js"
 
 /* Config */
-import config from "./config.json" assert {"type": "json"}
+import config from "./config.json" with {"type": "json"}
+
+/* Utils */
+import Embed from "./utils/Embed.js"
+import ListenersManager from "./managers/ListenersManager.js";
 
 /**
- * PlotBot class
+ * TakeOverBot class
  */
-class PlotBot {
+class TakeOverBot {
 
     /**
-     * PlotBot's constructor
+     * TakeOverBot's constructor
      */
     constructor() {
         this.config     = config
@@ -36,8 +40,13 @@ class PlotBot {
             steam   : new SteamClient(this)
         }
 
+        this.utils      = {
+            Embed: new Embed()
+        }
+
         this.managers   = {
-            commands: new CommandsManager(this)
+            commands: new CommandsManager(this),
+            listeners: new ListenersManager(this),
         }
 
         this.init()
@@ -52,7 +61,7 @@ class PlotBot {
 
         // Login the discord & mongo client
         await this.clients.discord.loginClient()
-        await this.clients.mongo.loginClient()
+        // await this.clients.mongo.loginClient()
 
         // When the discord client is ready
         this.clients.discord.getClient().once(Events.ClientReady, async () => {
@@ -60,7 +69,7 @@ class PlotBot {
 
             // Set the presence activity
             this.clients.discord.getClient().user.setPresence({
-                activities: [{ name: 'tes stats CS2', type: ActivityType.Watching }]
+                activities: [{ name: 'vos caisses', type: ActivityType.Watching }]
             })
 
             // Load all the commands
@@ -68,12 +77,16 @@ class PlotBot {
 
             await this.loggers.logger.log("INFO", this.constructor.name, "Bot is up!")
         })
+
+        this.clients.discord.getClient().on('raw', async packet => {
+            await this.managers.listeners.listen(packet);
+        })
     }
 }
 
 try {
     // Create a new instance of the discord bot
-    new PlotBot()
+    new TakeOverBot()
 } catch (e) {
     console.error(e);
 }

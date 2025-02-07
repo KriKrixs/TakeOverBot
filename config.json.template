@@ -1,14 +1,21 @@
 {
+  "ids": {
+    "guild": "",
+    "channels": {
+      "join": "",
+      "logs": "",
+      "chat": "",
+      "photos": "",
+      "presentation": ""
+    }
+  },
   "discord": {
     "clientId": "",
     "token": "",
     "logWebhook": ""
   },
   "mongodb": {
-    "url": "mongodb://",
-    "db": "cstracker_prod"
-  },
-  "steam": {
-    "apiKey": ""
+    "url": "",
+    "db": ""
   }
 }

@@ -1,23 +1,29 @@
-# Discord Bot CSTracker
+# Bot discord Take Over Motorsport
 
-Discord server of "Les Plots" : [https://discord.gg/63gTsKFWQm](https://discord.gg/63gTsKFWQm)
+Take Over Motorsport is a car enthusiast brand that aims to connect enthusiasts and car industry professionals.
 
-This is a little discord bot that allows users to track their CS2 stats
-You can add a webhook link in the config in order to have the logs of the bots into a discord channel.
+- Website / Shop : [takeovermotorsport.com](https://takeovermotorsport.com)
+- Instagram : [@takeovermotorsport](https://www.instagram.com/takeovermotorsport)
+- Facebook : [Take Over Motorsport](https://www.facebook.com/profile.php?id=61558450501564)
+- Discord : [discord.gg/xv4AtYdw6X](https://discord.gg/xv4AtYdw6X)
+
+This bot is designed to help the discord's staff to manage server and to enhance the user experiment.
 
 ## Command list
 
-For now, the bot is focused on CS2 but is "designed" to add more games and platform
+This bot will probably don't have a lot of command as it needs to be very simple to use
 
 - `/ping` Pong !
-- `/link {platform} {link}` Allow user to link their account on a platform
-- `/steam {link}` Allow to get infos about user's steam profile or linked profile
-- `/stats {game} {target} {user}` Allow to get stats on a game and a specific topic. A user can be selected otherwise it will be the user who executed the command.
-- `/unlink {platform}` Unlink a platform account from the user
+
+## Listeners
+
+- User join
+- User has accepted the rules
+- User leave
 
 ## Requirements
 
-- Node 20
+- Node 22
 - A MongoDB Server
 
 ## Install
