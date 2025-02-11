@@ -34,7 +34,7 @@ export default class UserJoinLeave {
             .setColor(color)
             .setThumbnail("https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png")
             .addFields({ name: "Bienvenue", value: "<@!" + user.id + ">" })
-            .addFields({ name: "Date", value: ("0" + dateToHumanFormat(new Date())) })
+            .addFields({ name: "Date", value: dateToHumanFormat(new Date()) })
 
         joinChannel.send({ embeds: [embed] })
 
@@ -44,6 +44,11 @@ export default class UserJoinLeave {
                 "N'hésite pas à poster des photos de ta caisse dans <#" + this.config.ids.channels.photos + ">.\n" +
                 "Tu peux également te présenter et partager ton instagram dans <#" + this.config.ids.channels.presentation + "> !"
             )
+
+            const roleVisiteur = guild.roles.cache.find(role => role.id === this.config.ids.roles.visiteur);
+            const member = guild.members.cache.get(user.id)
+
+            member.roles.add(roleVisiteur)
         }
     }
 
@@ -56,7 +61,7 @@ export default class UserJoinLeave {
             .setColor('#F04848')
             .setThumbnail("https://cdn.discordapp.com/avatars/" + data.user.id + "/" + data.user.avatar + ".png")
             .addFields({ name: "Nom", value: "<@!" + data.user.id + ">" })
-            .addFields({ name: "Date", value: ("0" + dateToHumanFormat(new Date())) })
+            .addFields({ name: "Date", value: dateToHumanFormat(new Date()) })
 
         channel.send({ embeds: [embed] })
     }
