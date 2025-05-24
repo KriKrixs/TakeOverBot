@@ -1,7 +1,7 @@
 {
   "name": "takeoverbot",
   "displayName": "Bot TakeOver",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Bot discord pour Take Over Motorsport",
   "main": "index.js",
   "scripts": {
