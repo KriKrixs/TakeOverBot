@@ -18,6 +18,8 @@ import config from "./config.json" with {"type": "json"}
 /* Utils */
 import Embed from "./utils/Embed.js"
 import ListenersManager from "./managers/ListenersManager.js";
+import InstagramWatcher from "./watchers/InstagramWatcher.js";
+import YouTubeWatcher from "./watchers/YouTubeWatcher.js";
 
 /**
  * TakeOverBot class
@@ -49,6 +51,11 @@ class TakeOverBot {
             listeners: new ListenersManager(this),
         }
 
+        this.watchers   = {
+            instagram: new InstagramWatcher(this),
+            youtube: new YouTubeWatcher(this),
+        }
+
         this.init()
     }
 
@@ -61,7 +68,9 @@ class TakeOverBot {
 
         // Login the discord & mongo client
         await this.clients.discord.loginClient()
-        // await this.clients.mongo.loginClient()
+        await this.clients.mongo.loginClient()
+
+
 
         // When the discord client is ready
         this.clients.discord.getClient().once(Events.ClientReady, async () => {
@@ -74,6 +83,14 @@ class TakeOverBot {
 
             // Load all the commands
             await this.managers.commands.load()
+
+            setInterval(async () => {
+                await this.watchers.instagram.getLastPost();
+
+                for (const playlistId of Array.from(this.config.watchers.youtube.playlistIds)) {
+                     await this.watchers.youtube.getLastVideo(playlistId);
+                }
+            }, this.config.watchers.interval)
 
             await this.loggers.logger.log("INFO", this.constructor.name, "Bot is up!")
         })
