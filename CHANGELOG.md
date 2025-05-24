@@ -4,6 +4,24 @@ All notable changes to `TakeOverBot` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](https://keepachangelog.com/) principles.
 
+## v0.1.0 - 24/05/2025
+
+### Added
+- Auto post new Instagram Post or Reel on a specific discord channel
+- Auto post new YouTube videos or shorts on a specific discord channel
+- DOM Parser package
+- GuildMessageReactions Discord client's intent
+- Emergency Listener V1 (User send messages on a specific channel, if the channel was inactive for X minutes, bot ask all the users if it's a real emergency. Yes => Bot pings everyone, No => Bot delete messages)
+- Command "/send" to allow a user with a specific role to send messages as the bot.
+- [WIP] Add role based on reactions on bot's messages.
+- CreateIndex MongoDB client
+
+### Changed
+- UserJoinLeave is now UserJoinLeaveListener
+
+### Removed
+- Some useless console.log()
+
 ## v0.0.2 - 11/02/2025
 
 ### Added

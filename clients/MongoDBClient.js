@@ -100,4 +100,25 @@ export default class MongoDBClient {
             return false
         }
     }
+
+    /**
+     * Create index
+     * @param collectionName    Collection name to create an index
+     * @param indexName         Index name to create
+     * @returns {*}             The created index or false if an error occurred
+     */
+    createIndex(collectionName, indexName) {
+        try {
+            const collection = this.db.collection(collectionName)
+
+            const index = {}
+            index[indexName] = 1
+
+            return collection.createIndex(index)
+        } catch (e) {
+            this.loggers.logger.log("WARNING", this.constructor.name, "Can't create index - " + e.message)
+
+            return false
+        }
+    }
 }

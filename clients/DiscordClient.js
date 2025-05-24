@@ -15,7 +15,7 @@ export default class DiscordClient {
         this.loggers    = opt.loggers
 
         // Creating the client with the intent of fetching guilds
-        this.client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages] });
+        this.client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions] });
     }
 
     /**

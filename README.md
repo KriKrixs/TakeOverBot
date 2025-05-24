@@ -14,12 +14,20 @@ This bot is designed to help the discord's staff to manage server and to enhance
 This bot will probably don't have a lot of command as it needs to be very simple to use
 
 - `/ping` Pong !
+- `/send {channel} {message}` Send a message as the bot only if the user as a specific role.
 
 ## Listeners
 
 - User join
 - User has accepted the rules
 - User leave
+- Emergency
+- [WIP] Reaction Role
+
+## Watchers
+
+- New YouTube videos or shorts from 1 or multiples channels.
+- New Instagram post or reels from 1 account.
 
 ## Requirements
 

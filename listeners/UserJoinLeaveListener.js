@@ -1,6 +1,6 @@
 import {dateToHumanFormat} from "../functions.js";
 
-export default class UserJoinLeave {
+export default class UserJoinLeaveListener {
     constructor(opt) {
         this.config     = opt.config
         this.clients    = opt.clients
@@ -13,7 +13,7 @@ export default class UserJoinLeave {
         const guild = this.clients.discord.getClient().guilds.cache.get(this.config.ids.guild)
         const joinChannel = guild.channels.cache.get(this.config.ids.channels.join)
         const chatChannel = guild.channels.cache.get(this.config.ids.channels.chat)
-        let user = null
+        let user
 
         if(action === "GUILD_MEMBER_ADD") {
             user = data.user
