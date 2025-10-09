@@ -54,8 +54,8 @@ $ npm start
 ### Docker compose
 
 - Ensure you can access your MongoDB server
-- Copy `config.json.template` to `config.json` and fill it
-- Use takeoverbot-prod in [docker-compose.yml](docker-compose.yml) and edit the config.json volume to your convenience
+- Copy `.env.template` to `.env` and fill it
+- Use takeoverbot-prod in [docker-compose.yml](docker-compose.yml)
 - Start the bot
 
 ## ChangeLog
