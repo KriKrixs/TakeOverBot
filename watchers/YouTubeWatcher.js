@@ -7,7 +7,14 @@ export default class YouTubeWatcher {
 
     async getLastVideo(playlistId) {
         console.log("YouTube check")
-        const response = await fetch(`https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&key=${process.env.WATCHERS_YOUTUBE_APIKEY}`)
+        let response;
+
+        try {
+            response = await fetch(`https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&key=${process.env.WATCHERS_YOUTUBE_APIKEY}`)
+        } catch (e) {
+            await this.loggers.logger.log("WARNING", this.constructor.name, "Error while fetching YouTube videos: " + e.message)
+            return;
+        }
 
         if(response.ok) {
             const data = await response.json()

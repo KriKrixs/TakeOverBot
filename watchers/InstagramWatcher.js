@@ -10,11 +10,17 @@ export default class InstagramWatcher {
     async getLastPost() {
         console.log("Instagram check")
         const headers = await this.getInstagramHeaders();
+        let response;
 
-        const response = await fetch(`https://www.instagram.com/api/v1/users/web_profile_info/?username=${process.env.WATCHERS_INSTAGRAM_USERNAME}`, {
-            method: 'GET',
-            headers,
-        })
+        try {
+            response = await fetch(`https://www.instagram.com/api/v1/users/web_profile_info/?username=${process.env.WATCHERS_INSTAGRAM_USERNAME}`, {
+                method: 'GET',
+                headers,
+            })
+        } catch (e) {
+            await this.loggers.logger.log("WARNING", this.constructor.name, "Error while fetching Instagram Post: " + e.message)
+            return;
+        }
 
         if(response.ok) {
             const data = await response.json();
