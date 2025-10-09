@@ -10,6 +10,9 @@ Updates should follow the [Keep a CHANGELOG](https://keepachangelog.com/) princi
 - Docker image
 - [WIP] Role website updater
 
+### Fixed
+- YouTube and Instagram watcher crashing the entire bot
+
 ### Changed
 - Convert config.json to .env
 
