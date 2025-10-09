@@ -4,6 +4,18 @@ All notable changes to `TakeOverBot` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](https://keepachangelog.com/) principles.
 
+## v0.1.1 - 09/10/2025
+
+### Added
+- Docker image
+- [WIP] Role website updater
+
+### Changed
+- Convert config.json to .env
+
+### Removed
+- Steam client
+
 ## v0.1.0 - 24/05/2025
 
 ### Added

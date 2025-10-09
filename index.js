@@ -1,10 +1,10 @@
 /* Modules */
 import { Events, ActivityType } from "discord.js"
+import 'dotenv/config'
 
 /* Clients */
 import DiscordClient from "./clients/DiscordClient.js"
 import MongoDBClient from "./clients/MongoDBClient.js"
-import SteamClient from "./clients/SteamClient.js"
 
 /* Managers */
 import CommandsManager from "./managers/CommandsManager.js"
@@ -12,14 +12,12 @@ import CommandsManager from "./managers/CommandsManager.js"
 /* Loggers */
 import Logger from "./loggers/Logger.js"
 
-/* Config */
-import config from "./config.json" with {"type": "json"}
-
 /* Utils */
 import Embed from "./utils/Embed.js"
 import ListenersManager from "./managers/ListenersManager.js";
 import InstagramWatcher from "./watchers/InstagramWatcher.js";
 import YouTubeWatcher from "./watchers/YouTubeWatcher.js";
+import RolesListener from "./listeners/RolesListener.js";
 
 /**
  * TakeOverBot class
@@ -30,8 +28,6 @@ class TakeOverBot {
      * TakeOverBot's constructor
      */
     constructor() {
-        this.config     = config
-
         this.loggers    = {
             logger: new Logger(this)
         }
@@ -39,11 +35,14 @@ class TakeOverBot {
         this.clients    = {
             discord : new DiscordClient(this),
             mongo   : new MongoDBClient(this),
-            steam   : new SteamClient(this)
         }
 
         this.utils      = {
             Embed: new Embed()
+        }
+
+        this.listeners = {
+            roles: new RolesListener(this)
         }
 
         this.managers   = {
@@ -70,8 +69,6 @@ class TakeOverBot {
         await this.clients.discord.loginClient()
         await this.clients.mongo.loginClient()
 
-
-
         // When the discord client is ready
         this.clients.discord.getClient().once(Events.ClientReady, async () => {
             await this.loggers.logger.log("INFO", this.constructor.name, "Discord is ready")
@@ -81,16 +78,18 @@ class TakeOverBot {
                 activities: [{ name: 'vos caisses', type: ActivityType.Watching }]
             })
 
+            await this.listeners.roles.updateWebRoles();
+
             // Load all the commands
             await this.managers.commands.load()
 
             setInterval(async () => {
                 await this.watchers.instagram.getLastPost();
 
-                for (const playlistId of Array.from(this.config.watchers.youtube.playlistIds)) {
+                for (const playlistId of Array.from(process.env.WATCHERS_YOUTUBE_PLAYLISTIDS)) {
                      await this.watchers.youtube.getLastVideo(playlistId);
                 }
-            }, this.config.watchers.interval)
+            }, process.env.WATCHERS_INTERVAL)
 
             await this.loggers.logger.log("INFO", this.constructor.name, "Bot is up!")
         })

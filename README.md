@@ -36,6 +36,8 @@ This bot will probably don't have a lot of command as it needs to be very simple
 
 ## Install
 
+### Native
+
 - Ensure you can access your MongoDB server
 - Copy `config.json.template` to `config.json` and fill it
 - Install the dependencies 
@@ -48,6 +50,13 @@ $ npm install
 ```bash
 $ npm start
 ```
+
+### Docker compose
+
+- Ensure you can access your MongoDB server
+- Copy `config.json.template` to `config.json` and fill it
+- Use takeoverbot-prod in [docker-compose.yml](docker-compose.yml) and edit the config.json volume to your convenience
+- Start the bot
 
 ## ChangeLog
 

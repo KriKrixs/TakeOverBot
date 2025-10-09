@@ -1,0 +1,17 @@
+services:
+  takeoverbot-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./.env:/usr/src/app/.env:ro
+    restart: unless-stopped
+  takeoverbot-prod:
+    image: krikrixs/takeoverbot:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+
+networks:
+  default:
+    driver: bridge

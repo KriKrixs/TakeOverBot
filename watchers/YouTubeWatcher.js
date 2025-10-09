@@ -1,6 +1,5 @@
 export default class YouTubeWatcher {
     constructor(opt) {
-        this.config     = opt.config
         this.clients    = opt.clients
         this.loggers    = opt.loggers
         this.utils      = opt.utils
@@ -8,7 +7,7 @@ export default class YouTubeWatcher {
 
     async getLastVideo(playlistId) {
         console.log("YouTube check")
-        const response = await fetch(`https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&key=${this.config.watchers.youtube.apiKey}`)
+        const response = await fetch(`https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&key=${process.env.WATCHERS_YOUTUBE_APIKEY}`)
 
         if(response.ok) {
             const data = await response.json()
@@ -27,8 +26,8 @@ export default class YouTubeWatcher {
 
                     const videoUrl = shortResponse.ok ? shortResponse.url : `https://www.youtube.com/watch?v=${videoId}`
 
-                    const guild = this.clients.discord.getClient().guilds.cache.get(this.config.ids.guild)
-                    const youtubeChannel = guild.channels.cache.get(this.config.ids.channels.youtube)
+                    const guild = this.clients.discord.getClient().guilds.cache.get(process.env.IDS_GUILD)
+                    const youtubeChannel = guild.channels.cache.get(process.env.IDS_CHANNELS_YOUTUBE)
 
                     youtubeChannel.send(videoUrl)
                 }

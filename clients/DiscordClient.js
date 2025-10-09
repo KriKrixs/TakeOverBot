@@ -11,7 +11,6 @@ export default class DiscordClient {
      * @param opt this of PlotBot object
      */
     constructor(opt) {
-        this.config     = opt.config;
         this.loggers    = opt.loggers
 
         // Creating the client with the intent of fetching guilds
@@ -23,7 +22,7 @@ export default class DiscordClient {
      */
     async loginClient() {
         try {
-            await this.client.login(this.config.discord.token);
+            await this.client.login(process.env.DISCORD_TOKEN);
         } catch (e) {
             this.loggers.logger.log("CRITICAL", this.constructor.name, "Can't login to discord - " + e.message)
         }

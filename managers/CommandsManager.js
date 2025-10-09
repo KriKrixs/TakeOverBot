@@ -14,7 +14,6 @@ export default class CommandsManager {
      * @param opt this of PlotBot object
      */
     constructor(opt) {
-        this.config     = opt.config
         this.clients    = opt.clients
         this.loggers    = opt.loggers
     }
@@ -69,12 +68,12 @@ export default class CommandsManager {
         }
 
         // Preparing the REST API object to push the commands globally
-        const rest = new REST({ version: '10' }).setToken(this.config.discord.token);
+        const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
         // Push the commands globally
         try {
             await rest.put(
-                Routes.applicationCommands(this.config.discord.clientId),
+                Routes.applicationCommands(process.env.DISCORD_CLIENTID),
                 { body: commands },
             );
         } catch (e) {

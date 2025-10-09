@@ -2,7 +2,6 @@ import {dateToHumanFormat} from "../functions.js";
 
 export default class UserJoinLeaveListener {
     constructor(opt) {
-        this.config     = opt.config
         this.clients    = opt.clients
         this.loggers    = opt.loggers
         this.utils      = opt.utils
@@ -10,9 +9,9 @@ export default class UserJoinLeaveListener {
 
     async userJoin(packet, action) {
         const data = packet.d;
-        const guild = this.clients.discord.getClient().guilds.cache.get(this.config.ids.guild)
-        const joinChannel = guild.channels.cache.get(this.config.ids.channels.join)
-        const chatChannel = guild.channels.cache.get(this.config.ids.channels.chat)
+        const guild = this.clients.discord.getClient().guilds.cache.get(process.env.IDS_GUILD)
+        const joinChannel = guild.channels.cache.get(process.env.IDS_CHANNELS_JOIN)
+        const chatChannel = guild.channels.cache.get(process.env.IDS_CHANNELS_CHAT)
         let user
 
         if(action === "GUILD_MEMBER_ADD") {
@@ -41,11 +40,11 @@ export default class UserJoinLeaveListener {
         if(action === "GUILD_JOIN_REQUEST_UPDATE") {
             chatChannel.send("" +
                 "Bienvenue <@!" + user.id + "> ! Je te laisse te renommé \"Prénom - Voiture\".\n" +
-                "N'hésite pas à poster des photos de ta caisse dans <#" + this.config.ids.channels.photos + ">.\n" +
-                "Tu peux également te présenter et partager ton instagram dans <#" + this.config.ids.channels.presentation + "> !"
+                "N'hésite pas à poster des photos de ta caisse dans <#" + process.env.IDS_CHANNELS_PHOTOS + ">.\n" +
+                "Tu peux également te présenter et partager ton instagram dans <#" + process.env.IDS_CHANNELS_PRESENTATION + "> !"
             )
 
-            const roleVisiteur = guild.roles.cache.find(role => role.id === this.config.ids.roles.visiteur);
+            const roleVisiteur = guild.roles.cache.find(role => role.id === process.env.IDS_ROLES_VISITEUR);
             const member = guild.members.cache.get(user.id)
 
             member.roles.add(roleVisiteur)
@@ -54,8 +53,8 @@ export default class UserJoinLeaveListener {
 
     async userLeave(packet) {
         const data = packet.d;
-        const guild = this.clients.discord.getClient().guilds.cache.get(this.config.ids.guild)
-        const channel = guild.channels.cache.get(this.config.ids.channels.join)
+        const guild = this.clients.discord.getClient().guilds.cache.get(process.env.IDS_GUILD)
+        const channel = guild.channels.cache.get(process.env.IDS_CHANNELS_JOIN)
 
         let embed = this.utils.Embed.embed().setTitle("📤 Départ de " + data.user.username)
             .setColor('#F04848')

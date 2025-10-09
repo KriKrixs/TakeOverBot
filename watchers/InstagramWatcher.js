@@ -2,7 +2,6 @@ import {parseFromString} from "dom-parser";
 
 export default class InstagramWatcher {
     constructor(opt) {
-        this.config     = opt.config
         this.clients    = opt.clients
         this.loggers    = opt.loggers
         this.utils      = opt.utils
@@ -12,7 +11,7 @@ export default class InstagramWatcher {
         console.log("Instagram check")
         const headers = await this.getInstagramHeaders();
 
-        const response = await fetch(`https://www.instagram.com/api/v1/users/web_profile_info/?username=${this.config.watchers.instagram.username}`, {
+        const response = await fetch(`https://www.instagram.com/api/v1/users/web_profile_info/?username=${process.env.WATCHERS_INSTAGRAM_USERNAME}`, {
             method: 'GET',
             headers,
         })
@@ -27,7 +26,7 @@ export default class InstagramWatcher {
 
                 if(Array.from(pinnedUsers).length > 0) {
                     Array.from(pinnedUsers).some(pinnedUser => {
-                        if(pinnedUser.username === this.config.watchers.instagram.username) {
+                        if(pinnedUser.username === process.env.WATCHERS_INSTAGRAM_USERNAME) {
                             isPinned = true;
                         }
                     })
@@ -43,8 +42,8 @@ export default class InstagramWatcher {
 
                         const postUrl = `https://www.instagram.com/${edge.node["is_video"] ? "reel" : "p"}/${edge.node.shortcode}/`
 
-                        const guild = this.clients.discord.getClient().guilds.cache.get(this.config.ids.guild)
-                        const instaChannel = guild.channels.cache.get(this.config.ids.channels.instagram)
+                        const guild = this.clients.discord.getClient().guilds.cache.get(process.env.IDS_GUILD)
+                        const instaChannel = guild.channels.cache.get(process.env.IDS_CHANNELS_INSTAGRAM)
 
                         instaChannel.send(postUrl)
                     }

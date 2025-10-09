@@ -11,11 +11,10 @@ export default class MongoDBClient {
      * @param opt this of PlotBot object
      */
     constructor(opt) {
-        this.config     = opt.config
-        this.loggers    = opt.loggers
+        this.loggers = opt.loggers
 
         // Creating the client
-        this.client = new MongoClient(opt.config.mongodb.url)
+        this.client = new MongoClient(process.env.MONGODB_URL)
         this.db     = null;
     }
 
@@ -25,7 +24,7 @@ export default class MongoDBClient {
      */
     async loginClient() {
         await this.client.connect()
-        this.db = this.client.db(this.config.mongodb.db)
+        this.db = this.client.db(process.env.MONGODB_DB)
     }
 
     /**

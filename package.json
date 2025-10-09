@@ -1,7 +1,7 @@
 {
   "name": "takeoverbot",
   "displayName": "Bot TakeOver",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Bot discord pour Take Over Motorsport",
   "main": "index.js",
   "scripts": {
@@ -13,6 +13,7 @@
   "dependencies": {
     "discord.js": "^14.17.3",
     "dom-parser": "^1.1.5",
+    "dotenv": "^17.2.3",
     "mongodb": "^6.13.0"
   },
   "type": "module"

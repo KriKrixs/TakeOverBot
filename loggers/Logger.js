@@ -8,15 +8,6 @@ import {dateToHumanFormat} from "../functions.js";
  * Logger class
  */
 export default class Logger {
-
-    /**
-     * Logger's constructor
-     * @param opt this of PlotBot object
-     */
-    constructor(opt) {
-        this.config = opt.config
-    }
-
     /**
      * Log a text in a file and on discord
      * @param state                 State of the log (INFO, WARNING, CRITICAL)
@@ -42,7 +33,7 @@ export default class Logger {
 
         // Send the log on discord through a webhook
         try {
-            await fetch(this.config.discord.logWebhook, {
+            await fetch(process.env.DISCORD_LOGWEBHOOK, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
