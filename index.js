@@ -1,3 +1,6 @@
+/* Sentry */
+import * as Sentry from "@sentry/node";
+
 /* Modules */
 import { Events, ActivityType } from "discord.js"
 import 'dotenv/config'
@@ -28,8 +31,12 @@ class TakeOverBot {
      * TakeOverBot's constructor
      */
     constructor() {
+        if(process.env.SENTRY_ENABLE) {
+            Sentry.init({ dsn: process.env.SENTRY_DSN });
+        }
+
         this.loggers    = {
-            logger: new Logger(this)
+            logger: new Logger()
         }
 
         this.clients    = {
@@ -64,6 +71,8 @@ class TakeOverBot {
      */
     async init() {
         await this.loggers.logger.log("INFO", this.constructor.name, "Starting the bot")
+
+        info();
 
         // Login the discord & mongo client
         await this.clients.discord.loginClient()
