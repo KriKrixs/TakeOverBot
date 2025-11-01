@@ -72,8 +72,6 @@ class TakeOverBot {
     async init() {
         await this.loggers.logger.log("INFO", this.constructor.name, "Starting the bot")
 
-        info();
-
         // Login the discord & mongo client
         await this.clients.discord.loginClient()
         await this.clients.mongo.loginClient()
