@@ -31,7 +31,7 @@ class TakeOverBot {
      * TakeOverBot's constructor
      */
     constructor() {
-        if(process.env.SENTRY_ENABLE) {
+        if(process.env.SENTRY_ENABLE === "true") {
             Sentry.init({ dsn: process.env.SENTRY_DSN });
         }
 
