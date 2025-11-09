@@ -4,6 +4,44 @@ All notable changes to `TakeOverBot` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](https://keepachangelog.com/) principles.
 
+## v0.1.2 - 09/11/2025
+
+### To Implement
+- MongoDB package upgrade to version 7
+
+### Added
+- GlitchTip (Sentry) integration
+- Custom Exceptions:
+  - CommandNotFoundException
+  - MalformedCommandException
+  - UnauthorizedCommandException
+- Login timeout
+  - Discord
+  - MongoDB
+- Crash handler so the bot has time to send the error to GlitchTip
+- Handle possible malformed Instagram and YouTube API responses.
+- Role website updater
+
+### Fixed
+- Bot not starting fully due to events being fired before the listener is initialized.
+
+### Changed
+- Bot now crash if:
+  - It can't load commands or commands files are malformed.
+  - It can't connect to Discord.
+  - It can't connect to MongoDB.
+- Handle potential MongoDB errors in EmergencyListener.
+- "ERROR" logs are renamed "CRITICAL"
+- SendCommand now send only one message instead of 2 in case the user is not authorized to use the command.
+- Upgraded dependencies:
+  - `discord.js` from 14.17.3 to 14.24.2
+  - `mongodb` from 6.13.0 to 6.20.0
+
+### Removed
+- Useless console.log() in YouTubeWatcher and InstagramWatcher.
+- Useless code comment.
+- Log file
+
 ## v0.1.1 - 09/10/2025
 
 ### Added

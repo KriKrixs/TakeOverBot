@@ -47,8 +47,7 @@ export default class CommandsManager {
             try {
                 command = await import((process.platform === "win32" ? "file://" : "") + filePath);
             } catch (e) {
-                await this.loggers.logger.log("CRITICAL", this.constructor.name, "Can't import '" + filePath + "' - " + e.message)
-                return false
+                await this.loggers.logger.log("CRITICAL", this.constructor.name, "Can't import '" + filePath + "' - " + e.message, e, true)
             }
 
             // If the command have the required functions data and execute
@@ -63,7 +62,8 @@ export default class CommandsManager {
                 // Set the command into the collection of commands
                 await this.clients.discord.getClient().commands.set(data.name, command);
             } else {
-                await this.loggers.logger.log("WARNING", this.constructor.name, "The command at '" + filePath + "' is missing the required 'data' and 'execute' functions")
+                let errorMessage = "The command at '" + filePath + "' is missing the required 'data' and/or 'execute' functions";
+                await this.loggers.logger.log("WARNING", this.constructor.name, errorMessage, new MalformedCommandException(errorMessage), true)
             }
         }
 
@@ -77,7 +77,7 @@ export default class CommandsManager {
                 { body: commands },
             );
         } catch (e) {
-            await this.loggers.logger.log("CRITICAL", this.constructor.name, "Can't push the commands globally - " + e.message)
+            await this.loggers.logger.log("CRITICAL", this.constructor.name, "Can't push the commands globally - " + e.message, e, true)
         }
 
         // Required to pass the current this to the commands
@@ -93,13 +93,16 @@ export default class CommandsManager {
             // Retrieve the command by its name
             const command = this.clients.discord.getClient().commands.get(interaction.commandName);
 
-            if (!command)
-                return this.loggers.logger.log("WARNING", this.constructor.name, "No command matching '" + interaction.commandName + "' was found")
+            // Should not happen, but we will log it anyway
+            if (!command) {
+                let errorMessage = "No command matching '" + interaction.commandName + "' was found";
+                return this.loggers.logger.log("WARNING", this.constructor.name, errorMessage, new CommandNotFoundException(errorMessage))
+            }
 
             try {
                 await command.execute(interaction, opt);
             } catch (e) {
-                await this.loggers.logger.log("WARNING", this.constructor.name, "Error while executing the command '" + interaction.commandName + "' - " + e.message)
+                await this.loggers.logger.log("WARNING", this.constructor.name, "Error while executing the command '" + interaction.commandName + "' - " + e.message, e)
             }
         });
 

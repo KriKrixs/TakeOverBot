@@ -33,7 +33,7 @@ export default class RolesListener {
             });
             await this.loggers.logger.log("INFO", this.constructor.name, "Web roles updated successfully");
         } catch (error) {
-            await this.loggers.logger.log("ERROR", this.constructor.name, `Error updating web roles: ${error.message}`);
+            await this.loggers.logger.log("CRITICAL", this.constructor.name, `Error updating web roles: ${error.message}`, error);
         }
     }
 }

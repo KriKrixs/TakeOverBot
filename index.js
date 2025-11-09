@@ -32,11 +32,23 @@ class TakeOverBot {
      */
     constructor() {
         if(process.env.SENTRY_ENABLE === "true") {
-            Sentry.init({ dsn: process.env.SENTRY_DSN });
+            console.log("Init Sentry");
+
+            Sentry.init({
+                dsn: process.env.SENTRY_DSN,
+                serverName: process.env.SENTRY_SERVER_NAME,
+                debug: process.env.SENTRY_DEBUG === "true",
+                beforeSend(event) {
+                    if(process.env.SENTRY_DEBUG === "true") {
+                        console.log("Sending event to Sentry:", event.event_id);
+                    }
+                    return event;
+                },
+            });
         }
 
         this.loggers    = {
-            logger: new Logger()
+            logger: new Logger(Sentry)
         }
 
         this.clients    = {
@@ -72,10 +84,6 @@ class TakeOverBot {
     async init() {
         await this.loggers.logger.log("INFO", this.constructor.name, "Starting the bot")
 
-        // Login the discord & mongo client
-        await this.clients.discord.loginClient()
-        await this.clients.mongo.loginClient()
-
         // When the discord client is ready
         this.clients.discord.getClient().once(Events.ClientReady, async () => {
             await this.loggers.logger.log("INFO", this.constructor.name, "Discord is ready")
@@ -104,6 +112,10 @@ class TakeOverBot {
         this.clients.discord.getClient().on('raw', async packet => {
             await this.managers.listeners.listen(packet);
         })
+
+        // Login the discord & mongo client
+        await this.clients.discord.loginClient()
+        await this.clients.mongo.loginClient()
     }
 }
 
@@ -113,3 +125,23 @@ try {
 } catch (e) {
     console.error(e);
 }
+
+// ⚠️ Capture + flush + exit pour TOUTE erreur non gérée
+const fatal = async (err, code = 1) => {
+    // err peut être un string / objet -> normaliser
+    const error = err instanceof Error ? err : new Error(String(err));
+    Sentry.captureException(error);
+    try { await Sentry.flush(5000); } catch {}
+    process.exit(code);
+};
+
+process.on('uncaughtException', (err) => fatal(err, 1));
+process.on('unhandledRejection', (reason) => fatal(reason, 1));
+
+// (optionnel) quand on reçoit un SIGTERM/SIGINT (Docker stop, Ctrl+C)
+const graceful = async (code = 0) => {
+    try { await Sentry.flush(3000); } catch {}
+    process.exit(code);
+};
+process.on('SIGTERM', () => graceful(0));
+process.on('SIGINT',  () => graceful(0));

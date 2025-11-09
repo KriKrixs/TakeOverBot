@@ -17,8 +17,6 @@ export default class ListenersManager {
     async listen(packet) {
         const action = packet.t;
 
-        // console.log(action)
-
         if(action === "GUILD_MEMBER_ADD" || action === "GUILD_JOIN_REQUEST_UPDATE") {
             await this.listeners.userJoinLeave.userJoin(packet, action)
         }

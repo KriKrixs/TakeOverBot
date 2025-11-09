@@ -38,8 +38,8 @@ export const execute = async (interaction, opt) => {
     const userRoles = interaction.member.roles.cache.filter(roles => roles.id !== interaction.member.guild.id).map(role => role.id);
 
     if(!userRoles.includes(process.env.IDS_ROLES_PERMBOT)) {
-        await opt.loggers.logger.log("WARNING", "SendCommand", `User <@${interaction.user.id}> tried to use this command without having the rights to do so.`)
-        await opt.loggers.logger.log("WARNING", "SendCommand", `Command used: /send ${interaction.options.getChannel('channel')} ${interaction.options.getString('message')}`)
+        let errorMessage = `User <@${interaction.user.id}> tried to use the command /send ${interaction.options.getChannel('channel')} ${interaction.options.getString('message')}, without having the rights to do so.`;
+        await opt.loggers.logger.log("WARNING", "SendCommand", errorMessage, new UnauthorizedCommandException(errorMessage))
         return interaction.editReply({ content: 'Tu n\'es pas autorisé à utiliser cette commande.' })
     }
 
