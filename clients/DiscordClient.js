@@ -22,9 +22,19 @@ export default class DiscordClient {
      */
     async loginClient() {
         try {
-            await this.client.login(process.env.DISCORD_TOKEN);
+            this.loggers.logger.log("INFO", this.constructor.name, "Attempting discord login")
+
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Discord login timed out')), process.env.DISCORD_LOGIN_TIMEOUT)
+            );
+
+            const loginPromise = this.client.login(process.env.DISCORD_TOKEN);
+
+            await Promise.race([loginPromise, timeoutPromise]);
+
+            this.loggers.logger.log("INFO", this.constructor.name, "Discord successfully logged in")
         } catch (e) {
-            this.loggers.logger.log("CRITICAL", this.constructor.name, "Can't login to discord - " + e.message)
+            this.loggers.logger.log("CRITICAL", this.constructor.name, "Can't login to discord - " + e.message, e, true)
         }
     }
 

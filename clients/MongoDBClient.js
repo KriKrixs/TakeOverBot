@@ -23,8 +23,23 @@ export default class MongoDBClient {
      * @returns {Promise<void>} Don't care
      */
     async loginClient() {
-        await this.client.connect()
-        this.db = this.client.db(process.env.MONGODB_DB)
+        try {
+            this.loggers.logger.log("INFO", this.constructor.name, "Attempting mongodb login")
+
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Mongodb login timed out')), process.env.MONGODB_LOGIN_TIMEOUT)
+            );
+
+            const loginPromise = this.client.connect()
+
+            await Promise.race([loginPromise, timeoutPromise]);
+
+            this.loggers.logger.log("INFO", this.constructor.name, "Mongodb successfully logged in")
+
+            this.db = this.client.db(process.env.MONGODB_DB)
+        } catch (e) {
+            this.loggers.logger.log("CRITICAL", this.constructor.name, "Can't login to mongodb - " + e.message, e, true)
+        }
     }
 
     /**
@@ -39,7 +54,7 @@ export default class MongoDBClient {
 
             return collection.find(filter).toArray()
         } catch (e) {
-            this.loggers.logger.log("WARNING", this.constructor.name, "Can't find documents - " + e.message)
+            this.loggers.logger.log("WARNING", this.constructor.name, "Can't find documents - " + e.message, e)
 
             return false
         }
@@ -57,7 +72,7 @@ export default class MongoDBClient {
 
             return collection.insertMany(documents)
         } catch (e) {
-            this.loggers.logger.log("WARNING", this.constructor.name, "Can't insert documents - " + e.message)
+            this.loggers.logger.log("WARNING", this.constructor.name, "Can't insert documents - " + e.message, e)
 
             return false
         }
@@ -76,7 +91,7 @@ export default class MongoDBClient {
 
             return collection.updateOne(filter, update)
         } catch (e) {
-            this.loggers.logger.log("WARNING", this.constructor.name, "Can't update a document - " + e.message)
+            this.loggers.logger.log("WARNING", this.constructor.name, "Can't update a document - " + e.message, e)
 
             return false
         }
@@ -94,7 +109,7 @@ export default class MongoDBClient {
 
             return collection.deleteMany(filter)
         } catch (e) {
-            this.loggers.logger.log("WARNING", this.constructor.name, "Can't remove documents - " + e.message)
+            this.loggers.logger.log("WARNING", this.constructor.name, "Can't remove documents - " + e.message, e)
 
             return false
         }
@@ -115,7 +130,7 @@ export default class MongoDBClient {
 
             return collection.createIndex(index)
         } catch (e) {
-            this.loggers.logger.log("WARNING", this.constructor.name, "Can't create index - " + e.message)
+            this.loggers.logger.log("WARNING", this.constructor.name, "Can't create index - " + e.message, e)
 
             return false
         }

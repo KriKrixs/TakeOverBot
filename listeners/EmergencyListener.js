@@ -13,13 +13,16 @@ export default class EmergencyListener {
         if(data["channel_id"] === process.env.IDS_CHANNELS_EMERGENCY && data.author.id !== process.env.IDS_USERS_BOT) {
             const interval = new Date(Date.now() - process.env.LISTENERS_EMERGENCY_LATESTEMERGENCYMESSAGEINTERVAL * 60 * 1000);
 
-            await this.clients.mongo.createIndex("emergencyMessages", "createdAt")
+            let indexIsCreated = await this.clients.mongo.createIndex("emergencyMessages", "createdAt")
+
+            if(!indexIsCreated)
+                return;
 
             const latestEmergencyMessages = await this.clients.mongo.findDocuments("emergencyMessages", {
                 createdAt: { $gte: interval },
             })
 
-            if(Array.from(latestEmergencyMessages).length === 0) {
+            if(latestEmergencyMessages !== false && Array.from(latestEmergencyMessages).length === 0) {
                 const guild = this.clients.discord.getClient().guilds.cache.get(process.env.IDS_GUILD)
                 const channel = guild.channels.cache.get(process.env.IDS_CHANNELS_EMERGENCY)
 
@@ -50,14 +53,18 @@ export default class EmergencyListener {
 
         if(this.emergencyBotMessageId !== null && data["message_id"] === this.emergencyBotMessageId.botMessage.id && data["user_id"] !== process.env.IDS_USERS_BOT) {
             if(data.emoji.name === "✅") {
-                await this.clients.mongo.insertDocuments("emergencyMessages", [{ createdAt: new Date() }])
+                let documentIsInserted = await this.clients.mongo.insertDocuments("emergencyMessages", [{ createdAt: new Date() }])
 
                 clearTimeout(this.emergencyBotMessageId.afkTimeout)
 
                 const guild = this.clients.discord.getClient().guilds.cache.get(process.env.IDS_GUILD)
                 const channel = guild.channels.cache.get(process.env.IDS_CHANNELS_EMERGENCY)
 
-                channel.send("@everyone")
+                if(!documentIsInserted) {
+                    channel.send("@everyone, Une erreur est survenue lors du traitement du message d'urgence, merci de communiquer dans <#" + process.env.IDS_CHANNELS_CHAT + ">")
+                } else {
+                    channel.send("@everyone")
+                }
 
                 this.emergencyBotMessageId.botMessage.delete()
 

@@ -8,7 +8,6 @@ export default class InstagramWatcher {
     }
 
     async getLastPost() {
-        console.log("Instagram check")
         const headers = await this.getInstagramHeaders();
         let response;
 
@@ -18,45 +17,49 @@ export default class InstagramWatcher {
                 headers,
             })
         } catch (e) {
-            await this.loggers.logger.log("WARNING", this.constructor.name, "Error while fetching Instagram Post: " + e.message)
+            await this.loggers.logger.log("WARNING", this.constructor.name, "Error while fetching Instagram Post: " + e.message, e)
             return;
         }
 
-        if(response.ok) {
-            const data = await response.json();
+        try {
+            if(response.ok) {
+                const data = await response.json();
 
-            for (let edge of Array.from(data.data.user.edge_owner_to_timeline_media.edges)) {
-                const pinnedUsers = edge.node.pinned_for_users;
+                for (let edge of Array.from(data.data.user.edge_owner_to_timeline_media.edges)) {
+                    const pinnedUsers = edge.node.pinned_for_users;
 
-                let isPinned = false;
+                    let isPinned = false;
 
-                if(Array.from(pinnedUsers).length > 0) {
-                    Array.from(pinnedUsers).some(pinnedUser => {
-                        if(pinnedUser.username === process.env.WATCHERS_INSTAGRAM_USERNAME) {
-                            isPinned = true;
-                        }
-                    })
-                }
-
-                if(!isPinned) {
-                    const latestPostKnown = await this.clients.mongo.findDocuments("lastPost", {"shortcode": edge.node.shortcode})
-
-                    if(latestPostKnown.length === 0) {
-                        await this.loggers.logger.log("INFO", this.constructor.name, "New Instagram Post!")
-                        await this.clients.mongo.removeDocuments("lastPost", {})
-                        await this.clients.mongo.insertDocuments("lastPost", [{"shortcode": edge.node.shortcode}])
-
-                        const postUrl = `https://www.instagram.com/${edge.node["is_video"] ? "reel" : "p"}/${edge.node.shortcode}/`
-
-                        const guild = this.clients.discord.getClient().guilds.cache.get(process.env.IDS_GUILD)
-                        const instaChannel = guild.channels.cache.get(process.env.IDS_CHANNELS_INSTAGRAM)
-
-                        instaChannel.send(postUrl)
+                    if(Array.from(pinnedUsers).length > 0) {
+                        Array.from(pinnedUsers).some(pinnedUser => {
+                            if(pinnedUser.username === process.env.WATCHERS_INSTAGRAM_USERNAME) {
+                                isPinned = true;
+                            }
+                        })
                     }
 
-                    break;
+                    if(!isPinned) {
+                        const latestPostKnown = await this.clients.mongo.findDocuments("lastPost", {"shortcode": edge.node.shortcode})
+
+                        if(latestPostKnown.length === 0) {
+                            await this.loggers.logger.log("INFO", this.constructor.name, "New Instagram Post!")
+                            await this.clients.mongo.removeDocuments("lastPost", {})
+                            await this.clients.mongo.insertDocuments("lastPost", [{"shortcode": edge.node.shortcode}])
+
+                            const postUrl = `https://www.instagram.com/${edge.node["is_video"] ? "reel" : "p"}/${edge.node.shortcode}/`
+
+                            const guild = this.clients.discord.getClient().guilds.cache.get(process.env.IDS_GUILD)
+                            const instaChannel = guild.channels.cache.get(process.env.IDS_CHANNELS_INSTAGRAM)
+
+                            instaChannel.send(postUrl)
+                        }
+
+                        break;
+                    }
                 }
             }
+        } catch (e) {
+            await this.loggers.logger.log("WARNING", this.constructor.name, "Instagram response seems malformed: " + e.message, e)
         }
     }
 

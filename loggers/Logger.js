@@ -1,6 +1,3 @@
-/* Modules */
-import { appendFileSync, existsSync, mkdirSync } from "fs";
-
 /* Functions */
 import {dateToHumanFormat} from "../functions.js";
 
@@ -9,27 +6,30 @@ import {dateToHumanFormat} from "../functions.js";
  */
 export default class Logger {
     /**
+     * Logger's constructor
+     * @param sentry this
+     */
+    constructor(sentry) {
+        this.sentry = sentry
+    }
+
+    /**
      * Log a text in a file and on discord
      * @param state                 State of the log (INFO, WARNING, CRITICAL)
      * @param className             The class name from where the log is called
      * @param text                  The text to log
+     * @param exception             Exception if state is not "INFO"
+     * @param exit                  If we want to kill the program
      * @returns {Promise<boolean>}  Don't care
      */
-    async log(state, className, text) {
-        console.log(state + " - [" + className + "] " + text)
+    async log(state, className, text, exception = null, exit = false) {
+        let logMessage = state + " - [" + className + "] " + text;
 
-        const dir = "./logs"
+        console.log(logMessage);
 
-        // If the logs folder don't exist, create it
-        if(!existsSync(dir))
-            mkdirSync(dir)
-
-        // Define the filename
-        const date = new Date()
-        const file = dir + "/" + date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, '0') + "-" + String(date.getDate()).padStart(2, '0') + ".log"
-
-        // Write in the file
-        appendFileSync(file, state + " - [" + className + "] " + text + "\n")
+        if(state !== "INFO" && exception !== null) {
+            this.sentry.captureException(exception)
+        }
 
         // Send the log on discord through a webhook
         try {
@@ -43,7 +43,13 @@ export default class Logger {
                 }),
             });
         } catch (e) {
-            appendFileSync(file, "WARNING - [" + this.constructor.name + "] " + e.message + "\n")
+            this.sentry.captureException(e)
+        }
+
+        if(exit) {
+            await this.sentry.flush(5000);
+
+            process.exit(1);
         }
 
         return true
