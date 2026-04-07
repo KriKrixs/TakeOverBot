@@ -1,0 +1,6 @@
+﻿services:
+  takeoverbot:
+    image: takeoverbot
+    build:
+      context: .
+      dockerfile: Dockerfile

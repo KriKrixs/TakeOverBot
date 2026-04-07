@@ -1,5 +1,9 @@
-node_modules/
-config.json
-.idea
-logs/
 .env
+identifier.sqlite
+.idea
+.env.local
+
+Sentry/
+Data/
+bin/
+obj/
