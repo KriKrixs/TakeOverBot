@@ -2,6 +2,7 @@
 using System.Reflection;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using TakeOverBot.Interfaces;
 
 namespace TakeOverBot.Handler;
@@ -11,7 +12,7 @@ public class CommandHandler
     private readonly DiscordSocketClient _client;
     private readonly Dictionary<string, ISlashCommand> _commands;
 
-    public CommandHandler(DiscordSocketClient client)
+    public CommandHandler(DiscordSocketClient client, IServiceProvider services)
     {
         _client = client;
 
@@ -19,7 +20,7 @@ public class CommandHandler
         _commands = Assembly.GetExecutingAssembly()
             .GetTypes()
             .Where(t => typeof(ISlashCommand).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
-            .Select(t => (ISlashCommand)Activator.CreateInstance(t)!)
+            .Select(t => (ISlashCommand)ActivatorUtilities.CreateInstance(services, t))
             .ToDictionary(cmd => cmd.Name);
     }
 

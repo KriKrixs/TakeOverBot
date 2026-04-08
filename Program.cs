@@ -61,10 +61,12 @@ var services = new ServiceCollection()
     .AddHttpClient()
     .AddSingleton(client)
     .AddSingleton<FacebookService>()
+    .AddSingleton<VoteService>()
     .AddDbContext<AppDbContext>(o => o.UseSqlite($"Data Source={databasePath}"))
     .BuildServiceProvider();
 
 var facebookService = services.GetRequiredService<FacebookService>();
+var voteService = services.GetRequiredService<VoteService>();
 
 _ = Task.Run(async () =>
 {
@@ -84,7 +86,13 @@ _ = Task.Run(async () =>
     }
 });
 
-var handler = new CommandHandler(client);
+_ = Task.Run(async () =>
+{
+    try { await voteService.StartAsync(); }
+    catch (Exception e) { Console.WriteLine($"[VotePollService] Erreur : {e.Message}"); }
+});
+
+var handler = new CommandHandler(client, services);
 _ = new ListenerHandler(client);
 
 client.Log += msg =>
