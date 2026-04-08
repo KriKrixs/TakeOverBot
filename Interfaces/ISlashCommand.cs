@@ -6,7 +6,9 @@ public interface ISlashCommand
 {
     string Name { get; }
     string Description { get; }
+    string Icon => "❓";
     GuildPermission? RequiredPermission => null;
+    string[] AllowedRoleIds => [];
     ISlashCommandOption[] Options => [];
 
     Task ExecuteAsync(Discord.WebSocket.SocketSlashCommand command);

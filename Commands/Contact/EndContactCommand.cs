@@ -6,6 +6,7 @@ namespace TakeOverBot.Commands.Contact;
 public class EndContactCommand : ISlashCommand
 {
     public string Name => "endcontact";
+    public string Icon => "🔒";
     public string Description => "Ferme le canal de contact actuel";
 
     public async Task ExecuteAsync(SocketSlashCommand command)

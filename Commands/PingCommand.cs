@@ -6,6 +6,7 @@ namespace TakeOverBot.Commands;
 public class PingCommand : ISlashCommand
 {
     public string Name => "ping";
+    public string Icon => "🏓";
     public string Description => "Répond avec Pong !";
 
     public async Task ExecuteAsync(SocketSlashCommand command)

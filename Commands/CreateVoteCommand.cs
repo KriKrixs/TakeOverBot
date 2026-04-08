@@ -9,7 +9,9 @@ namespace TakeOverBot.Commands;
 public class CreateVoteCommand(IServiceScopeFactory scopeFactory) : ISlashCommand
 {
     public string Name => "vote";
+    public string Icon => "🗳️";
     public string Description => "Crée un sondage Discord dans un channel";
+    public string[] AllowedRoleIds => ["DISCORD_IDS_ROLES_ADMIN", "DISCORD_IDS_ROLES_STAFF"];
 
     public ISlashCommandOption[] Options =>
     [
@@ -57,13 +59,6 @@ public class CreateVoteCommand(IServiceScopeFactory scopeFactory) : ISlashComman
         var guildUser = command.User as SocketGuildUser;
 
         var isAdmin = guildUser!.Roles.Any(r => r.Id.ToString() == adminRoleId);
-        var isStaff = guildUser.Roles.Any(r => r.Id.ToString() == staffRoleId);
-
-        if (!isAdmin && !isStaff)
-        {
-            await command.FollowupAsync("❌ Tu n'es pas autorisé à utiliser cette commande.", ephemeral: true);
-            return;
-        }
 
         var options = command.Data.Options.ToDictionary(o => o.Name, o => o.Value);
 

@@ -7,6 +7,7 @@ namespace TakeOverBot.Commands.Contact;
 public class ContactCommand : ISlashCommand
 {
     public string Name => "contact";
+    public string Icon => "📩";
     public string Description => "Ouvre un canal de contact avec le staff ou uniquement les admins";
     public ISlashCommandOption[] Options =>
     [

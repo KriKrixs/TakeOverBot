@@ -7,7 +7,9 @@ namespace TakeOverBot.Commands;
 public class SendCommand : ISlashCommand
 {
     public string Name => "send";
+    public string Icon => "📨";
     public string Description => "Envoie un message dans un channel";
+    public string[] AllowedRoleIds => ["DISCORD_IDS_ROLES_ADMIN", "DISCORD_IDS_ROLES_PERMBOT"];
     public ISlashCommandOption[] Options => [
         new SlashCommandOption(
             "channel",
@@ -24,18 +26,6 @@ public class SendCommand : ISlashCommand
     public async Task ExecuteAsync(SocketSlashCommand command)
     {
         await command.DeferAsync(ephemeral: true);
-
-        var allowedRoleId = Environment.GetEnvironmentVariable("DISCORD_IDS_ROLES_PERMBOT");
-        var guildUser = command.User as SocketGuildUser;
-
-        var hasPermission = guildUser!.Roles
-            .Any(r => r.Id.ToString() == allowedRoleId);
-
-        if (!hasPermission)
-        {
-            await command.FollowupAsync("Tu n'es pas autorisé à utiliser cette commande.", ephemeral: true);
-            return;
-        }
 
         var targetChannel = command.Data.Options.First(o => o.Name == "channel").Value as SocketTextChannel;
         var content = command.Data.Options.First(o => o.Name == "message").Value as string;

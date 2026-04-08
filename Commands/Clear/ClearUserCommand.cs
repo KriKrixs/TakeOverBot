@@ -9,7 +9,9 @@ namespace TakeOverBot.Commands.Clear;
 public class ClearUserCommand : ISlashCommand
 {
     public string Name => "clearuser";
+    public string Icon => "🧹";
     public string Description => "Supprime les messages d'un utilisateur sur une période donnée";
+    public string[] AllowedRoleIds => ["DISCORD_IDS_ROLES_ADMIN"];
 
     public ISlashCommandOption[] Options =>
     [
@@ -41,16 +43,6 @@ public class ClearUserCommand : ISlashCommand
         await command.DeferAsync(ephemeral: true);
 
         var executor = command.User as SocketGuildUser;
-        var allowedRoleId = Environment.GetEnvironmentVariable("DISCORD_IDS_ROLES_ADMIN");
-
-        var hasPermission = executor!.Roles.Any(r => r.Id.ToString() == allowedRoleId);
-
-        if (!hasPermission)
-        {
-            await command.FollowupAsync("Tu n'es pas autorisé à utiliser cette commande.", ephemeral: true);
-            return;
-        }
-
         var options = command.Data.Options.ToDictionary(o => o.Name, o => o.Value);
 
         var target = options["utilisateur"] as SocketGuildUser;
@@ -67,7 +59,7 @@ public class ClearUserCommand : ISlashCommand
             ? DateTimeOffset.UtcNow - TimeSpan.FromDays(temps)
             : DateTimeOffset.UtcNow - TimeSpan.FromHours(temps);
 
-        var guild = executor.Guild;
+        var guild = executor!.Guild;
         var totalDeleted = 0;
         var channelsAffected = 0;
 
