@@ -8,7 +8,6 @@ public class MuteCommand : ISlashCommand
 {
     public string Name => "mute";
     public string Description => "Mute un membre pour une durée donnée";
-    public GuildPermission? RequiredPermission => GuildPermission.Administrator;
 
     public ISlashCommandOption[] Options =>
     [
@@ -39,6 +38,17 @@ public class MuteCommand : ISlashCommand
     {
         await command.DeferAsync(ephemeral: true);
 
+        var executor = command.User as SocketGuildUser;
+        var allowedRoleId = Environment.GetEnvironmentVariable("DISCORD_IDS_ROLES_ADMIN");
+
+        var hasPermission = executor!.Roles.Any(r => r.Id.ToString() == allowedRoleId);
+
+        if (!hasPermission)
+        {
+            await command.FollowupAsync("Tu n'es pas autorisé à utiliser cette commande.", ephemeral: true);
+            return;
+        }
+
         var options = command.Data.Options.ToDictionary(o => o.Name, o => o.Value);
 
         var target = options["utilisateur"] as SocketGuildUser;
@@ -60,8 +70,6 @@ public class MuteCommand : ISlashCommand
             return;
         }
 
-        var executor = command.User as SocketGuildUser;
-
         if (target!.Hierarchy >= executor!.Hierarchy)
         {
             await command.FollowupAsync("❌ Tu ne peux pas mute un membre avec un rôle égal ou supérieur au tien.", ephemeral: true);
@@ -73,8 +81,7 @@ public class MuteCommand : ISlashCommand
         var dureeFormatee = unite == "jours" ? $"{temps} jour{(temps > 1 ? "s" : "")}" : $"{temps} heure{(temps > 1 ? "s" : "")}";
 
         var channelId = ulong.Parse(Environment.GetEnvironmentVariable("DISCORD_IDS_CHANNELS_LOGS") ?? "0");
-        var user = command.User as SocketGuildUser;
-        var channel = user!.Guild.GetTextChannel(channelId);
+        var channel = executor.Guild.GetTextChannel(channelId);
 
         await command.FollowupAsync($"✅ {target.Mention} a été mute pour **{dureeFormatee}** par {executor.Mention}.", ephemeral: true);
         await channel!.SendMessageAsync($"✅ {target.Mention} a été mute pour **{dureeFormatee}** par {executor.Mention}.");
