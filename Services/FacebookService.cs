@@ -322,6 +322,16 @@ public class FacebookService(HttpClient httpClient, IServiceScopeFactory scopeFa
                 continue;
             }
 
+            if (post.IsManual)
+            {
+                var pendingPost = await dbContext.PendingPosts
+                    .Where(p => p.Platform == "instagram" && p.VideoId == post.Id)
+                    .FirstOrDefaultAsync();
+
+                dbContext.PendingPosts.Remove(pendingPost!);
+                await dbContext.SaveChangesAsync();
+            }
+
             if (!lastPostUpdated)
             {
                 lastPost.Date = long.Parse(post.Date);
