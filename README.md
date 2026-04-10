@@ -1,4 +1,4 @@
-# Bot discord Take Over Motorsport
+# Discord Bot Take Over Motorsport
 
 Take Over Motorsport is a car enthusiast brand that aims to connect enthusiasts and car industry professionals.
 
@@ -11,10 +11,17 @@ This bot is designed to help the discord's staff to manage server and to enhance
 
 ## Command list
 
-This bot will probably don't have a lot of command as it needs to be very simple to use
+This bot will probably don't have a lot of command as it needs to be basic to use
 
+- **Admin** : `/clearmsg {messageId}` Clear messages from a channel until the specified message.
+- **Admin** : `/clearuser {user} {duration} {days or hours}` Clear messages from a user in every channel until a specified time.
+- **Admin** : `/mute {user} {duration} {days or hours}` Mute a user for a specific duration.
+- **Admin or Staff** : `/vote {staff or admin} {question} {choices (separated by commas)} {duration} {enable multi select}` Create a poll with reminder.
+- **Admin or Perm Bot** : `/send {channel} {message}` Send a message as the bot only if the user as a specific role.
+- `/contact {staff or admin}` Create a specific channel for the user to contact the staff or the admin.
+- `/endContact` Close the contact channel.
+- `/help {command}` Display the help of a specific command or a list of all the commands.
 - `/ping` Pong !
-- `/send {channel} {message}` Send a message as the bot only if the user as a specific role.
 
 ## Listeners
 
@@ -26,37 +33,28 @@ This bot will probably don't have a lot of command as it needs to be very simple
 
 ## Watchers
 
-- New YouTube videos or shorts from 1 or multiples channels.
-- New Instagram post or reels from 1 account.
+- New Instagram post or reels from takeovermotorsport account..
 
 ## Requirements
 
-- Node 22
-- A MongoDB Server
+- .NET 10
 
 ## Install
 
 ### Native
 
-- Ensure you can access your MongoDB server
-- Copy `config.json.template` to `config.json` and fill it
-- Install the dependencies 
+- Copy `.env.local.template` to `.env.local` and fill it
+- Install the dependencies
 
 ```bash
-$ npm install
+$ dotnet restore
 ```
+
 - Run the bot
 
 ```bash
-$ npm start
+$ dotnet build && dotnet run
 ```
-
-### Docker compose
-
-- Ensure you can access your MongoDB server
-- Copy `.env.template` to `.env` and fill it
-- Use takeoverbot-prod in [docker-compose.yml](docker-compose.yml)
-- Start the bot
 
 ## ChangeLog
 

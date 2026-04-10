@@ -4,6 +4,42 @@ All notable changes to `TakeOverBot` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](https://keepachangelog.com/) principles.
 
+## 2026.4.1 - 10/04/2026
+Rework of the bot. 100% rewritten in C#.
+
+### Added
+- Clear User command
+  - **Admin Only** 
+  - This command will delete all the messages of a specific user in a specific timeframe.
+- Clear Message command 
+  - **Admin Only**
+  - This command will delete all the messages of a specific channel until a specific message.
+- Contact command
+  - This command will allow users to contact the staff or admins by creating a specific channel.
+- End contact command
+  - This command will close a contact channel.
+- Create a poll command
+  - **Admin and Staff Only** 
+  - This command will allow users to create a poll.
+  - It will remind every targetted user to vote when the poll is halfway.
+  - It will close the poll when the time is up and ping every user that didn't vote for at least one option.
+- Help command
+  - This command will list all the commands of the bot.
+  - You can have the help for a specific command by using the command `/help <command>`.
+- Mute command
+  - **Admin Only**
+  - This command will mute a specific user for a specific timeframe.
+
+### Fixed
+- Better crash handling.
+- Completely reworked the instagram post-listener to use official Facebook Graph API.
+  - Scrapping a post is the only way i've found to handle collaborations.
+
+### Changed
+- Migrated from MongoDB to SQLite.
+- Emergencies
+  - Emergencies are now handled with the last message instead of the first one. Which means that the emergency will now only be considered ended after a specific amount of inactivity.
+
 ## v0.1.1 - 09/10/2025
 
 ### Added
