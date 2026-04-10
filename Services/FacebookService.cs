@@ -139,7 +139,7 @@ public class FacebookService(HttpClient httpClient, IServiceScopeFactory scopeFa
             .Where(p => p.Platform == "instagram")
             .FirstOrDefaultAsync();
 
-        if (lastPost is null || lastPost.Date > latestPostTimestamp)
+        if (lastPost is null || lastPost.Date >= latestPostTimestamp)
         {
             return false;
         }
