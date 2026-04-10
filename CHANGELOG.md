@@ -4,6 +4,11 @@ All notable changes to `TakeOverBot` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](https://keepachangelog.com/) principles.
 
+## 2026.4.1-hotfix1 - 10/04/2026
+
+### Fixed
+- Fixed a miss for pending post which results in loop posting
+
 ## 2026.4.1 - 10/04/2026
 Rework of the bot. 100% rewritten in C#.
 
