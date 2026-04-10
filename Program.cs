@@ -74,7 +74,7 @@ _ = Task.Run(async () =>
     {
         await facebookService.FetchLastPost();
 
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(150));
+        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(10));
         while (await timer.WaitForNextTickAsync())
         {
             await facebookService.FetchLastPost();

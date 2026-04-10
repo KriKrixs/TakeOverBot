@@ -3,6 +3,9 @@ using TakeOverBot.Interfaces;
 
 namespace TakeOverBot.Commands.Contact;
 
+/// <summary>
+/// End contact command aims to close the current contact channel.
+/// </summary>
 public class EndContactCommand : ISlashCommand
 {
     public string Name => "endcontact";

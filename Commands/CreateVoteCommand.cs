@@ -6,6 +6,12 @@ using TakeOverBot.Models;
 
 namespace TakeOverBot.Commands;
 
+/// <summary>
+/// Create vote command aims to create a poll in a given channel.
+/// This command is restricted to administrators or staff.
+/// This command will also save the poll in the database for later relance.
+/// </summary>
+/// <param name="scopeFactory">Used to get DbContext</param>
 public class CreateVoteCommand(IServiceScopeFactory scopeFactory) : ISlashCommand
 {
     public string Name => "vote";
@@ -77,7 +83,7 @@ public class CreateVoteCommand(IServiceScopeFactory scopeFactory) : ISlashComman
 
         var answers = choixRaw
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Take(10)
+            .Take(10) // Select only the first 10 choices
             .Select(c => new PollMediaProperties { Text = c })
             .ToList();
 
@@ -110,7 +116,7 @@ public class CreateVoteCommand(IServiceScopeFactory scopeFactory) : ISlashComman
 
         await channel.SendMessageAsync(text: targetRole!.Mention, poll: poll);
 
-        // Persister le sondage pour la relance
+        // Persist the poll in the database for later relance
         var sentMessages = await channel.GetMessagesAsync(1).FlattenAsync();
         var sentMessage = sentMessages.First();
 

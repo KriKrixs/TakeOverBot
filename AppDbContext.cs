@@ -9,6 +9,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<LastPost> LastPosts => Set<LastPost>();
     public DbSet<Token> Tokens => Set<Token>();
     public DbSet<VotePoll> VotePolls => Set<VotePoll>();
+    public DbSet<PendingPost> PendingPosts => Set<PendingPost>();
 }
 
 public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>

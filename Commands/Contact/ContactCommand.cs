@@ -4,6 +4,9 @@ using TakeOverBot.Interfaces;
 
 namespace TakeOverBot.Commands.Contact;
 
+/// <summary>
+/// Contact command aims to create a channel for a given user to contact the staff or admins.
+/// </summary>
 public class ContactCommand : ISlashCommand
 {
     public string Name => "contact";
@@ -36,10 +39,8 @@ public class ContactCommand : ISlashCommand
         var roleId = ulong.Parse(Environment.GetEnvironmentVariable(
             cible == "admin" ? "DISCORD_IDS_ROLES_ADMIN" : "DISCORD_IDS_ROLES_STAFF"
         ) ?? "0");
-        var muteRoleId = ulong.Parse(Environment.GetEnvironmentVariable("DISCORD_IDS_ROLES_MUTE") ?? "0");
 
         var targetRole = guild.GetRole(roleId);
-        var muteRole = guild.GetRole(muteRoleId);
 
         if (targetRole is null)
         {
@@ -56,9 +57,7 @@ public class ContactCommand : ISlashCommand
             // Autoriser le rôle cible (staff ou admin)
             new(targetRole.Id, PermissionTarget.Role, new OverwritePermissions(viewChannel: PermValue.Allow, sendMessages: PermValue.Allow)),
             // Autoriser l'utilisateur
-            new(user.Id, PermissionTarget.User, new OverwritePermissions(viewChannel: PermValue.Allow, sendMessages: PermValue.Allow)),
-            // Mute
-            new(muteRole.Id, PermissionTarget.Role, new OverwritePermissions(sendMessages: PermValue.Deny))
+            new(user.Id, PermissionTarget.User, new OverwritePermissions(viewChannel: PermValue.Allow, sendMessages: PermValue.Allow))
         };
 
         var channel = await guild.CreateTextChannelAsync(channelName, props =>

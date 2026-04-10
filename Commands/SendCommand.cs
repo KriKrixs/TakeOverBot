@@ -4,6 +4,10 @@ using TakeOverBot.Interfaces;
 
 namespace TakeOverBot.Commands;
 
+/// <summary>
+/// Send command aims to send a message in a given channel.
+/// This command is restricted to administrators or specific users.
+/// </summary>
 public class SendCommand : ISlashCommand
 {
     public string Name => "send";

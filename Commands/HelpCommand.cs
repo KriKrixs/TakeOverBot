@@ -5,6 +5,10 @@ using TakeOverBot.Interfaces;
 
 namespace TakeOverBot.Commands;
 
+/// <summary>
+/// Help command aims to provide assistance to users by listing available commands or displaying detailed information about a specific command.
+/// </summary>
+/// <param name="commands">Provided by the CommandHandler</param>
 public class HelpCommand(IEnumerable<ISlashCommand> commands) : ISlashCommand
 {
     public string Name => "help";
@@ -21,6 +25,9 @@ public class HelpCommand(IEnumerable<ISlashCommand> commands) : ISlashCommand
         )
     ];
 
+    /// <summary>
+    /// Remove the help command from the list of commands and order by name
+    /// </summary>
     private readonly IReadOnlyList<ISlashCommand> _commands = commands
         .Where(c => c is not HelpCommand)
         .OrderBy(c => c.Name)
@@ -34,6 +41,10 @@ public class HelpCommand(IEnumerable<ISlashCommand> commands) : ISlashCommand
             await SendCommandList(command);
     }
 
+    /// <summary>
+    /// Full list of commands
+    /// </summary>
+    /// <param name="command">Current command executed</param>
     private async Task SendCommandList(SocketSlashCommand command)
     {
         var lines = _commands.Select(cmd =>
@@ -52,6 +63,11 @@ public class HelpCommand(IEnumerable<ISlashCommand> commands) : ISlashCommand
         await command.RespondAsync(embed: embed, ephemeral: true);
     }
 
+    /// <summary>
+    /// Full list of commands
+    /// </summary>
+    /// <param name="command">Current command executed</param>
+    /// <param name="commandName">Command asked</param>
     private async Task SendCommandDetail(SocketSlashCommand command, string commandName)
     {
         var cmd = _commands.FirstOrDefault(c => c.Name == commandName);
@@ -62,14 +78,14 @@ public class HelpCommand(IEnumerable<ISlashCommand> commands) : ISlashCommand
             return;
         }
 
-        var builder = EmbedFactory.Create()
+        var embed = EmbedFactory.Create()
             .WithTitle($"{cmd.Icon}  /{cmd.Name}")
             .WithDescription(cmd.Description)
             .WithColor(new Color(0x5865F2));
 
         var roles = GetRoleMentions(cmd);
         if (roles.Length > 0)
-            builder.AddField("🔐 Rôles requis", string.Join(" ", roles), inline: true);
+            embed.AddField("🔐 Rôles requis", string.Join(" ", roles), inline: true);
 
         if (cmd.Options.Length > 0)
         {
@@ -79,12 +95,17 @@ public class HelpCommand(IEnumerable<ISlashCommand> commands) : ISlashCommand
                 return $"- `{o.Name}` *({tag})* — {o.Description}";
             });
 
-            builder.AddField("⚙️ Options", string.Join("\n", optionLines), inline: false);
+            embed.AddField("⚙️ Options", string.Join("\n", optionLines), inline: false);
         }
 
-        await command.RespondAsync(embed: builder.Build(), ephemeral: true);
+        await command.RespondAsync(embed: embed.Build(), ephemeral: true);
     }
 
+    /// <summary>
+    /// Fetch roles required by a command and return their mentions
+    /// </summary>
+    /// <param name="cmd">Command to fetch roles for</param>
+    /// <returns>Mentions of roles required by the command</returns>
     private static string[] GetRoleMentions(ISlashCommand cmd) =>
         cmd.AllowedRoleIds
             .Select(Environment.GetEnvironmentVariable)

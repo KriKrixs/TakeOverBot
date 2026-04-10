@@ -1,4 +1,3 @@
-// Commands/ClearMsgCommand.cs
 using Discord;
 using Discord.WebSocket;
 using TakeOverBot.Factories;
@@ -7,6 +6,10 @@ using TakeOverBot.Interfaces;
 
 namespace TakeOverBot.Commands.Clear;
 
+/// <summary>
+/// Clear message command aims to delete all messages up to a given message id.
+/// This command is restricted to administrators only.
+/// </summary>
 public class ClearMessageCommand : ISlashCommand
 {
     public string Name => "clearmsg";
@@ -45,12 +48,14 @@ public class ClearMessageCommand : ISlashCommand
 
         var toDelete = new List<IMessage>();
 
+        // Fetch messages in batches of 100
         await foreach (var batch in channel.GetMessagesAsync(limit: 100))
         {
             var reachedTarget = false;
 
             foreach (var msg in batch)
             {
+                // Stop fetching messages once we reach the target message
                 if (msg.Id == messageId)
                 {
                     reachedTarget = true;

@@ -6,6 +6,10 @@ using TakeOverBot.Interfaces;
 
 namespace TakeOverBot.Commands.Clear;
 
+/// <summary>
+/// Clear user command aims to delete all messages from a given user in a given period of time.
+/// This command is restricted to administrators only.
+/// </summary>
 public class ClearUserCommand : ISlashCommand
 {
     public string Name => "clearuser";
@@ -32,8 +36,8 @@ public class ClearUserCommand : ISlashCommand
             IsRequired: true,
             Choices:
             [
-                ("Heures", "heures"),
-                ("Jours", "jours")
+                ("Heures", "hours"),
+                ("Jours", "days")
             ]
         )
     ];
@@ -55,7 +59,7 @@ public class ClearUserCommand : ISlashCommand
             return;
         }
 
-        var since = unite == "jours"
+        var since = unite == "days"
             ? DateTimeOffset.UtcNow - TimeSpan.FromDays(temps)
             : DateTimeOffset.UtcNow - TimeSpan.FromHours(temps);
 
@@ -67,12 +71,14 @@ public class ClearUserCommand : ISlashCommand
         {
             var toDelete = new List<IMessage>();
 
+            // Fetch messages in batches of 100
             await foreach (var batch in channel.GetMessagesAsync(limit: 100))
             {
                 var reachedLimit = false;
 
                 foreach (var msg in batch)
                 {
+                    // Stop fetching messages once we are past the target time
                     if (msg.Timestamp < since)
                     {
                         reachedLimit = true;

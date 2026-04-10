@@ -4,6 +4,9 @@ using TakeOverBot.Interfaces;
 
 namespace TakeOverBot.Commands;
 
+/// <summary>
+/// Mute commands aims to mute a user for a given duration.
+/// </summary>
 public class MuteCommand : ISlashCommand
 {
     public string Name => "mute";
@@ -53,7 +56,7 @@ public class MuteCommand : ISlashCommand
             return;
         }
 
-        var duration = unite == "jours" ? TimeSpan.FromDays(temps) : TimeSpan.FromHours(temps);
+        var duration = unite == "days" ? TimeSpan.FromDays(temps) : TimeSpan.FromHours(temps);
 
         // Discord limite le timeout à 28 jours
         if (duration.TotalDays > 28)
@@ -70,7 +73,7 @@ public class MuteCommand : ISlashCommand
 
         await target.SetTimeOutAsync(duration);
 
-        var dureeFormatee = unite == "jours" ? $"{temps} jour{(temps > 1 ? "s" : "")}" : $"{temps} heure{(temps > 1 ? "s" : "")}";
+        var dureeFormatee = unite == "days" ? $"{temps} jour{(temps > 1 ? "s" : "")}" : $"{temps} heure{(temps > 1 ? "s" : "")}";
 
         var channelId = ulong.Parse(Environment.GetEnvironmentVariable("DISCORD_IDS_CHANNELS_LOGS") ?? "0");
         var channel = executor.Guild.GetTextChannel(channelId);
